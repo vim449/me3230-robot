@@ -1,18 +1,21 @@
 #include <Arduino.h>
+#include "SoftwareSerial.h"
+#include "sending.h"
 
-// put function declarations here:
-int myFunction(int, int);
+SoftwareSerial toMega(10, 11);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+  toMega.begin(115200);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  Serial.println(msg::header);
+  delay(1000);
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  // need to be able to send:
+  // drive X dir, pinion forward, pinion back
+  // conveyor on
+  // press button
+  // estop, turn X
 }
