@@ -9138,6 +9138,10 @@
 		(uuid "0c8e2129-8ab8-4207-a783-16b8c7d83087")
 	)
 	(no_connect
+		(at 340.36 78.74)
+		(uuid "19f4f36e-fc53-4532-9949-f927a6533ece")
+	)
+	(no_connect
 		(at 33.02 133.35)
 		(uuid "1d4c3843-8de1-4fdb-9ba6-af55522ae6e2")
 	)
@@ -9168,6 +9172,10 @@
 	(no_connect
 		(at 39.37 100.33)
 		(uuid "37f39192-b5ed-40b0-821d-ceadddd78449")
+	)
+	(no_connect
+		(at 341.63 120.65)
+		(uuid "3e55ed8d-8bbb-47c8-abf5-393202cd13f1")
 	)
 	(no_connect
 		(at 33.02 128.27)
@@ -9232,6 +9240,10 @@
 	(no_connect
 		(at 106.68 39.37)
 		(uuid "7557ec87-565c-4451-a8db-6dce2ed4d5e2")
+	)
+	(no_connect
+		(at 33.02 115.57)
+		(uuid "76307847-f57f-4e59-a30b-9e0928e8a50d")
 	)
 	(no_connect
 		(at 170.18 102.87)
@@ -9324,6 +9336,10 @@
 	(no_connect
 		(at 170.18 148.59)
 		(uuid "db8dd796-80e0-4d73-acb5-ebb0e47f82a2")
+	)
+	(no_connect
+		(at 33.02 113.03)
+		(uuid "e743abac-cc16-4641-82a9-172bc50d12ca")
 	)
 	(no_connect
 		(at 106.68 57.15)
@@ -10652,16 +10668,6 @@
 			(type default)
 		)
 		(uuid "789963fb-812b-4e74-a5df-67d6f8d5e37f")
-	)
-	(wire
-		(pts
-			(xy 332.74 78.74) (xy 340.36 78.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7d0202a2-f888-432c-a14b-cade59a26fc9")
 	)
 	(wire
 		(pts
@@ -12293,16 +12299,6 @@
 		)
 		(uuid "fefca44f-71c6-4016-8e2a-498a917b8afc")
 	)
-	(wire
-		(pts
-			(xy 334.01 120.65) (xy 341.63 120.65)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ff3ef0be-b525-4a24-aee5-aa47e55e434b")
-	)
 	(label "D45"
 		(at 327.66 41.91 0)
 		(effects
@@ -12533,7 +12529,7 @@
 		)
 		(uuid "3341ed54-7a62-4b5e-9930-c799198439db")
 	)
-	(label "A2"
+	(label "D34"
 		(at 334.01 123.19 0)
 		(effects
 			(font
@@ -12542,16 +12538,6 @@
 			(justify left bottom)
 		)
 		(uuid "33a4aa1e-2ce0-41db-81cb-fe35b71e0fef")
-	)
-	(label "D34"
-		(at 332.74 78.74 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "342c2926-6aac-442f-a776-52d24e404804")
 	)
 	(label "D36"
 		(at 80.01 186.69 180)
@@ -12953,7 +12939,7 @@
 		)
 		(uuid "7a784789-a442-4a40-8b67-d166be770bd3")
 	)
-	(label "A1"
+	(label "D36"
 		(at 332.74 81.28 0)
 		(effects
 			(font
@@ -13522,16 +13508,6 @@
 			(justify right bottom)
 		)
 		(uuid "c9fc4d03-6475-4653-92ae-e5dce21f29c9")
-	)
-	(label "D36"
-		(at 334.01 120.65 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ca87c577-a64f-4f18-a3d5-307336ae4cb9")
 	)
 	(label "M2_5"
 		(at 127 128.27 0)
