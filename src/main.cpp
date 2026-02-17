@@ -81,6 +81,7 @@ double x_dot, y_dot, theta_dot;
 int targetRack = 0;
 int currentRack = 0; // index of limit switch the rack is resting at
 double timerTarget = 0;
+bool servoTarget = false; // true if the servo should be extended
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -156,7 +157,7 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
 }
 
 void startConveyorService(bool forwards) {
-  timerTarget = t0 + 5;
+  timerTarget = t0 + 2;
   conveyor->setSpeed(forwards ? 400 : -400);
 }
 
@@ -277,7 +278,17 @@ void loop() {
   case waitingForData:
     break;
   case discarding:
-    // TODO
+    if (t >= timerTarget) {
+      if (servoTarget) {
+        // servo finished extending, bring it back
+        discardServo.write(0);
+        timerTarget = t + 2;
+        nextState = discarding;
+      } else {
+        // servo finished retracting, done discarding
+        nextState = waitingForData;
+      }
+    }
     break;
   }
   state = nextState;
