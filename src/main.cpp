@@ -201,7 +201,8 @@ void loop() {
   t = micros() / 1000000. - t0;
 
   // check for software stop
-  if (xbee.available() > 0) {
+  // waitingForData checks for data using a different routine
+  if (xbee.available() > 0 && state != waitingForData) {
     if (xbee.read() == SOFTWARE_STOP) {
       reset();
     }
@@ -236,13 +237,18 @@ void loop() {
         nextState = dispensing;
       } else {
         // TODO, determine needed x_dot, y_dot, theta_dot
-        nextState = driving;
+        // nextState = driving;
+
+        // For PM6, every actuation should go back to waitingForData
+        nextState = waitingForData;
       }
     }
     break;
   case pressButton:
     break;
   case waitingForBlock:
+    // TODO
+    // NOT NEEDED FOR PM6
     break;
   case movingRack:
     if (digitalRead(limitPins[targetRack]) == LOW) {
@@ -250,7 +256,12 @@ void loop() {
       rack->setBrake(400);
       if (targetRack == 0) {
         // at front of robot, determine next state
+
+        // For PM6, every actuation should go back to waitingForData
+        nextState = waitingForData;
       } else if (targetRack == 1) {
+        nextState = waitingForData;
+        /*
         // at back of robot for discarding or dispensing, determine next state
         if (needsDiscard) {
           discardServo.write(DISCARD_ANGLE);
@@ -260,11 +271,13 @@ void loop() {
           startConveyorService(true);
           nextState = dispensing;
         }
+        */
       }
     }
   case waitingForData:
     break;
   case discarding:
+    // TODO
     break;
   }
   state = nextState;
