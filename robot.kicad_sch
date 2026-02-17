@@ -9546,6 +9546,16 @@
 		)
 		(uuid "55b76105-b404-43c7-83f4-9a60620b58d5")
 	)
+	(text "Conveyor Motor"
+		(exclude_from_sim no)
+		(at 386.08 59.69 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "5c62844f-58c0-41b6-83b7-ff98bbb9bd4d")
+	)
 	(text "In Shovel"
 		(exclude_from_sim no)
 		(at 330.2 111.252 0)
@@ -9566,7 +9576,7 @@
 		)
 		(uuid "88e3560a-8e7f-44c3-a4b7-f8a2133959a5")
 	)
-	(text "This Shit Movin'"
+	(text "These Parts Move"
 		(exclude_from_sim no)
 		(at 323.85 21.59 0)
 		(effects
@@ -9585,6 +9595,36 @@
 			)
 		)
 		(uuid "9e1fee1e-f832-49a6-ae6d-3149a34143dd")
+	)
+	(text "Reflectance Sensor\nBack of Conveyor"
+		(exclude_from_sim no)
+		(at 370.84 82.804 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "a9d9d8cd-9b73-4a67-b15f-cc3a344d8e1d")
+	)
+	(text "Limit Switches\n(Tied to Pull-up Resistors)"
+		(exclude_from_sim no)
+		(at 292.1 166.116 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "b9168677-fb92-4e2b-a142-9bf6504a7642")
+	)
+	(text "Discard Servo"
+		(exclude_from_sim no)
+		(at 293.878 135.382 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "c1893e24-5dc6-42a1-95bb-ed9143cfca6a")
 	)
 	(text "Range-Finder\nBack of Robot"
 		(exclude_from_sim no)
@@ -9605,6 +9645,16 @@
 			)
 		)
 		(uuid "e14b1e6f-cf66-48b2-ad99-6993aa3b5a85")
+	)
+	(text "Rack Motor\n"
+		(exclude_from_sim no)
+		(at 388.62 41.148 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f6c71b3e-9397-4f9b-b881-d6d338043d7e")
 	)
 	(junction
 		(at 162.56 166.37)
@@ -9637,7 +9687,7 @@
 		(uuid "6e4e336a-7f35-4701-91e4-c362cedd5cc6")
 	)
 	(junction
-		(at 331.47 88.9)
+		(at 264.16 156.21)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "7f386e37-ec56-47fa-9069-44534393f6de")
@@ -9689,12 +9739,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "c5d97271-514b-4f64-9c3c-811d5a1eff05")
-	)
-	(junction
-		(at 344.17 88.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "c73142ce-2310-424b-840c-e3c9252d65db")
 	)
 	(junction
 		(at 208.28 146.05)
@@ -9990,7 +10034,7 @@
 	)
 	(wire
 		(pts
-			(xy 323.85 102.87) (xy 344.17 102.87)
+			(xy 256.54 170.18) (xy 276.86 170.18)
 		)
 		(stroke
 			(width 0)
@@ -10390,16 +10434,6 @@
 	)
 	(wire
 		(pts
-			(xy 356.87 99.06) (xy 356.87 105.41)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "29d7d6a7-8ec3-4e1f-b4d6-eacd24078e1c")
-	)
-	(wire
-		(pts
 			(xy 140.97 171.45) (xy 140.97 130.81)
 		)
 		(stroke
@@ -10660,16 +10694,6 @@
 	)
 	(wire
 		(pts
-			(xy 344.17 88.9) (xy 356.87 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4241b671-4c0f-45c3-9bec-364c7acafbe6")
-	)
-	(wire
-		(pts
 			(xy 69.85 173.99) (xy 80.01 173.99)
 		)
 		(stroke
@@ -10750,7 +10774,7 @@
 	)
 	(wire
 		(pts
-			(xy 331.47 99.06) (xy 331.47 100.33)
+			(xy 264.16 166.37) (xy 264.16 167.64)
 		)
 		(stroke
 			(width 0)
@@ -11070,7 +11094,7 @@
 	)
 	(wire
 		(pts
-			(xy 259.08 140.97) (xy 269.24 140.97)
+			(xy 250.19 139.7) (xy 260.35 139.7)
 		)
 		(stroke
 			(width 0)
@@ -11520,7 +11544,7 @@
 	)
 	(wire
 		(pts
-			(xy 331.47 88.9) (xy 344.17 88.9)
+			(xy 264.16 156.21) (xy 276.86 156.21)
 		)
 		(stroke
 			(width 0)
@@ -11960,7 +11984,7 @@
 	)
 	(wire
 		(pts
-			(xy 344.17 99.06) (xy 344.17 102.87)
+			(xy 276.86 166.37) (xy 276.86 170.18)
 		)
 		(stroke
 			(width 0)
@@ -12007,16 +12031,6 @@
 			(type default)
 		)
 		(uuid "b6cfa02f-efa9-4f53-b460-3dd40a053d18")
-	)
-	(wire
-		(pts
-			(xy 323.85 105.41) (xy 356.87 105.41)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b852ab2a-1268-4ade-967b-b51abcb3962c")
 	)
 	(wire
 		(pts
@@ -12070,7 +12084,7 @@
 	)
 	(wire
 		(pts
-			(xy 326.39 88.9) (xy 331.47 88.9)
+			(xy 259.08 156.21) (xy 264.16 156.21)
 		)
 		(stroke
 			(width 0)
@@ -12260,7 +12274,7 @@
 	)
 	(wire
 		(pts
-			(xy 323.85 100.33) (xy 331.47 100.33)
+			(xy 256.54 167.64) (xy 264.16 167.64)
 		)
 		(stroke
 			(width 0)
@@ -12978,16 +12992,6 @@
 		)
 		(uuid "17c62b03-d979-439f-ab03-2dfad165b8ab")
 	)
-	(label "D53"
-		(at 323.85 105.41 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "19403fa4-8375-4377-9d14-02ff2b5af5e6")
-	)
 	(label "M3_5"
 		(at 127 143.51 0)
 		(effects
@@ -13009,7 +13013,7 @@
 		(uuid "1aed1da2-7ad9-4289-8174-1a8f1e072712")
 	)
 	(label "D52"
-		(at 323.85 102.87 0)
+		(at 256.54 170.18 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13439,7 +13443,7 @@
 		(uuid "72658034-0600-4c51-9422-9ca31b40e0ae")
 	)
 	(label "D12"
-		(at 259.08 140.97 0)
+		(at 250.19 139.7 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -14089,7 +14093,7 @@
 		(uuid "cab1c766-f571-4a60-a7ba-1a4e52ac2fbe")
 	)
 	(label "D51"
-		(at 323.85 100.33 0)
+		(at 256.54 167.64 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15393,77 +15397,6 @@
 		)
 	)
 	(symbol
-		(lib_id "ME3230:PUSHBUTTON-SWITCH")
-		(at 356.87 93.98 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "279e4bc7-1777-4804-bf92-0bea43176771")
-		(property "Reference" "S3"
-			(at 359.41 92.7099 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "SWITCH"
-			(at 359.41 95.2499 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "MechLibrary:Header3"
-			(at 352.044 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 356.87 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 356.87 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "d76005cc-a6c5-4ffe-a185-2d0482676ea9")
-		)
-		(pin "1"
-			(uuid "be9b2c4e-4ea7-4673-bc90-240277e7f17d")
-		)
-		(instances
-			(project "robot"
-				(path "/c33baf39-1524-47fd-8733-9db21030ba51"
-					(reference "S3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 264.16 57.15 90)
 		(unit 1)
@@ -16751,7 +16684,7 @@
 	(symbol
 		(lib_name "SERVO_1")
 		(lib_id "ME3230:SERVO")
-		(at 271.78 140.97 180)
+		(at 262.89 139.7 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16760,7 +16693,7 @@
 		(fields_autoplaced yes)
 		(uuid "62666df2-1cff-4dff-a695-634442846799")
 		(property "Reference" "M1"
-			(at 290.83 137.1599 0)
+			(at 281.94 135.8899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16769,7 +16702,7 @@
 			)
 		)
 		(property "Value" "SERVO"
-			(at 290.83 139.6999 0)
+			(at 281.94 138.4299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16778,7 +16711,7 @@
 			)
 		)
 		(property "Footprint" "SERVO:SERVOFOOTPRINT"
-			(at 273.304 146.558 0)
+			(at 264.414 145.288 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16788,7 +16721,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 271.78 140.97 0)
+			(at 262.89 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16797,7 +16730,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 271.78 140.97 0)
+			(at 262.89 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18371,7 +18304,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 326.39 88.9 270)
+		(at 259.08 156.21 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18380,7 +18313,7 @@
 		(fields_autoplaced yes)
 		(uuid "9791112f-2f96-481b-9b32-6cc9ad5acbcb")
 		(property "Reference" "#PWR08"
-			(at 320.04 88.9 0)
+			(at 252.73 156.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18389,7 +18322,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 322.58 88.8999 90)
+			(at 255.27 156.2099 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18398,7 +18331,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 326.39 88.9 0)
+			(at 259.08 156.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18407,7 +18340,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 326.39 88.9 0)
+			(at 259.08 156.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18416,7 +18349,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 326.39 88.9 0)
+			(at 259.08 156.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18504,7 +18437,7 @@
 	)
 	(symbol
 		(lib_id "ME3230:PUSHBUTTON-SWITCH")
-		(at 344.17 93.98 270)
+		(at 276.86 161.29 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18513,7 +18446,7 @@
 		(fields_autoplaced yes)
 		(uuid "9ecaeaf1-d3e1-4380-8bac-ee41b7d3efd7")
 		(property "Reference" "S2"
-			(at 346.71 92.7099 90)
+			(at 279.4 160.0199 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18522,7 +18455,7 @@
 			)
 		)
 		(property "Value" "SWITCH"
-			(at 346.71 95.2499 90)
+			(at 279.4 162.5599 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18531,7 +18464,7 @@
 			)
 		)
 		(property "Footprint" "MechLibrary:Header3"
-			(at 339.344 93.98 0)
+			(at 272.034 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18541,7 +18474,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 344.17 93.98 0)
+			(at 276.86 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18550,7 +18483,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 344.17 93.98 0)
+			(at 276.86 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19503,7 +19436,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 269.24 138.43 90)
+		(at 260.35 137.16 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19512,7 +19445,7 @@
 		(fields_autoplaced yes)
 		(uuid "d3d35f7d-f179-47e2-b71a-bff1cb19077c")
 		(property "Reference" "#PWR07"
-			(at 273.05 138.43 0)
+			(at 264.16 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19521,7 +19454,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 265.43 138.4299 90)
+			(at 256.54 137.1599 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19530,7 +19463,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 269.24 138.43 0)
+			(at 260.35 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19539,7 +19472,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 269.24 138.43 0)
+			(at 260.35 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19548,7 +19481,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 269.24 138.43 0)
+			(at 260.35 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19714,7 +19647,7 @@
 	)
 	(symbol
 		(lib_id "ME3230:PUSHBUTTON-SWITCH")
-		(at 331.47 93.98 270)
+		(at 264.16 161.29 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19723,7 +19656,7 @@
 		(fields_autoplaced yes)
 		(uuid "d9510fd2-4480-4259-9344-5dc0e051d26d")
 		(property "Reference" "S1"
-			(at 334.01 92.7099 90)
+			(at 266.7 160.0199 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19732,7 +19665,7 @@
 			)
 		)
 		(property "Value" "SWITCH"
-			(at 334.01 95.2499 90)
+			(at 266.7 162.5599 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19741,7 +19674,7 @@
 			)
 		)
 		(property "Footprint" "MechLibrary:Header3"
-			(at 326.644 93.98 0)
+			(at 259.334 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19751,7 +19684,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 331.47 93.98 0)
+			(at 264.16 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19760,7 +19693,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 331.47 93.98 0)
+			(at 264.16 161.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19917,7 +19850,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 269.24 135.89 270)
+		(at 260.35 134.62 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19926,7 +19859,7 @@
 		(fields_autoplaced yes)
 		(uuid "e5980405-5371-4180-9c20-e7f3830b8a1a")
 		(property "Reference" "#PWR06"
-			(at 262.89 135.89 0)
+			(at 254 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19935,7 +19868,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 265.43 135.8899 90)
+			(at 256.54 134.6199 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19944,7 +19877,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 269.24 135.89 0)
+			(at 260.35 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19953,7 +19886,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 269.24 135.89 0)
+			(at 260.35 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19962,7 +19895,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 269.24 135.89 0)
+			(at 260.35 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
