@@ -61,17 +61,6 @@ double t, t0;
 // HardwareSerial* const xbee = &Serial3;
 #define xbee Serial3
 
-enum State {
-  driving,
-  storing,
-  dispensing,
-  discarding,
-  pressButton,
-  waitingForBlock,
-  movingRack,
-  waitingForData,
-};
-
 const long XBEE_BAUD = 115200;
 const long USB_BAUD = 9600;
 
