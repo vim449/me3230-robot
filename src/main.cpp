@@ -17,8 +17,10 @@ const uint8_t buttonServo_PWM = 11, discardServo_PWM = 12;
 const uint8_t lineQtrPins[8] = {23, 25, 27, 29, 31, 33, 35, 37};
 const uint8_t shovelQtrPins[1] = {34};
 const uint8_t conveyorQtrPins[1] = {36};
-const uint8_t limitPins[3] = {51, 52, 53};
+const uint8_t limitPins[2] = {51, 52};
 const uint8_t encoderPins[6] = {2, 3, 18, 19, 20, 21};
+const uint8_t motorCurrentPins[3] = {A3, A4, A5};
+const uint8_t hallEffectPin = A6;
 
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
@@ -26,7 +28,18 @@ L298N *drive_motors[3];
 L298N *conveyor;
 L298N *rack;
 PWMServo buttonServo, discardServo;
-double x_dot, y_dot, theta_dot;
+// maps from x' y' theta' space to motor space, can be found from getJacobian.m
+const BLA::Matrix<3, 3, double> motorJacobian = {0,
+                                                 1000.0 / 48.0,
+                                                 158.688 / 48.0,
+                                                 sqrt(3) / 0.096,
+                                                 -500.0 / 48.0,
+                                                 158.688 / 48.0,
+                                                 sqrt(3) / 0.096,
+                                                 500.0 / 48.0,
+                                                 -158.688 / 48.0};
+#define DISCARD_ANGLE 180
+#define DISCARD_STORE_ANGLE 0
 
 // sensors
 QTRSensors lineQtr;
@@ -34,8 +47,10 @@ QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
 const uint8_t qtrSensorCount = 8;
 uint16_t qtrSensorValues[qtrSensorCount];
-bool limitStates[3] = {false, false, false};
+bool limitStates[3] = {
+    true, true, true}; // switches are high by default and low when triggered
 Encoder *encoders[3];
+double hallEffect = 0.0;
 
 // time variables
 double t, t0;
@@ -48,6 +63,7 @@ enum State {
   driving,
   storing,
   dispensing,
+  discarding,
   pressButton,
   waitingForBlock,
   movingRack,
@@ -56,24 +72,36 @@ enum State {
 
 const long XBEE_BAUD = 115200;
 const long USB_BAUD = 9600;
+
+// control variables
 State state;
 State nextState;
+BLA::Matrix<3, 1, double> motorSpeeds = {0, 0, 0};
+double x_dot, y_dot, theta_dot;
+int targetRack = 0;
+int currentRack = 0; // index of limit switch the rack is resting at
+double timerTarget = 0;
 
-//game variables
-enum BlockType {none, wood, stone, iron, diamond};
+// game variables
+enum BlockType { none, wood, stone, iron, diamond };
 BlockType stored[3] = {none, none, none};
 BlockType pick = {wood};
 BlockType sword = {wood};
 bool shield = false;
+bool needsDiscard = false;
 
 void serialSetup() {
   Serial.begin(USB_BAUD);
-  Serial3.begin(XBEE_BAUD);
+  xbee.begin(XBEE_BAUD);
 }
 
 void controlMotors(double xdot, double ydot, double thetadot) {
+  BLA::Matrix<3, 1, double> in = {xdot, ydot, theta_dot};
+  motorSpeeds = motorJacobian * in;
 
-
+  for (int i = 0; i < 3; i++) {
+    drive_motors[i]->setSpeed(motorSpeeds(i));
+  }
 }
 
 void motorPinSetup() {
@@ -127,9 +155,36 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
   return J;
 }
 
+void startConveyorService(bool forwards) {
+  timerTarget = t0 + 5;
+  conveyor->setSpeed(forwards ? 400 : -400);
+}
+
+void moveRack(uint8_t target) {
+  targetRack = target;
+  if (targetRack > currentRack) {
+    // rack needs to drive forwards
+    rack->setSpeed(400); // TODO, determine if this is a reasonable speed
+  } else if (targetRack < currentRack) {
+    // rack needs to drive backwards
+    rack->setSpeed(-400);
+  } else {
+    // somehow this function was called with the rack in the target pos
+    rack->setBrake(400);
+  }
+}
+
 void reset() {
   motorPinSetup();
   sensorPinSetup();
+  // kill all motors
+  for (auto &motor : drive_motors) {
+    motor->setBrake(400);
+  }
+  conveyor->setBrake(400);
+  rack->setBrake(400);
+  // TODO reset encoders
+
   t0 = micros() / 1000000.;
   state = waitingForData;
   nextState = state;
@@ -148,25 +203,68 @@ void loop() {
   // check for software stop
   if (xbee.available() > 0) {
     if (xbee.read() == SOFTWARE_STOP) {
-      // kill all motors
-      for (auto &motor : drive_motors) {
-        motor->setBrake(400);
-      }
-      conveyor->setBrake(400);
-      rack->setBrake(400);
-      // TODO reset encoders
       reset();
     }
   }
 
   switch (state) {
   case driving:
+    if (t >= timerTarget) {
+      // finished driving, for now go back to waiting for instructions
+      for (auto &motor : drive_motors) {
+        motor->setBrake(400);
+        x_dot = 0;
+        y_dot = 0;
+        theta_dot = 0;
+        nextState = waitingForData;
+      }
+      // TODO, refactor to not be open loop control
+      controlMotors(x_dot, y_dot, theta_dot);
+    }
+    break;
   case storing:
+    break;
   case dispensing:
+    if (t >= timerTarget) {
+      conveyor->setBrake(400);
+      stored[0] = stored[1];
+      stored[1] = stored[2];
+      stored[2] = none;
+      // TODO, determine if robot should dispense again
+      if (false) {
+        startConveyorService(true);
+        nextState = dispensing;
+      } else {
+        // TODO, determine needed x_dot, y_dot, theta_dot
+        nextState = driving;
+      }
+    }
+    break;
   case pressButton:
+    break;
   case waitingForBlock:
+    break;
   case movingRack:
+    if (digitalRead(limitPins[targetRack]) == LOW) {
+      // rack is at target
+      rack->setBrake(400);
+      if (targetRack == 0) {
+        // at front of robot, determine next state
+      } else if (targetRack == 1) {
+        // at back of robot for discarding or dispensing, determine next state
+        if (needsDiscard) {
+          discardServo.write(DISCARD_ANGLE);
+          // todo, figure out how long servo takes to swing
+          nextState = discarding;
+        } else {
+          startConveyorService(true);
+          nextState = dispensing;
+        }
+      }
+    }
   case waitingForData:
+    break;
+  case discarding:
     break;
   }
   state = nextState;
