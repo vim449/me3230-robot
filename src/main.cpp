@@ -40,6 +40,8 @@ const BLA::Matrix<3, 3, double> motorJacobian = {0,
                                                  -158.688 / 48.0};
 #define DISCARD_ANGLE 180
 #define DISCARD_STORE_ANGLE 0
+#define PRESS_ANGLE 180
+#define PRESS_STORE_ANGLE 0
 
 // sensors
 QTRSensors lineQtr;
@@ -82,6 +84,8 @@ int targetRack = 0;
 int currentRack = 0; // index of limit switch the rack is resting at
 double timerTarget = 0;
 bool servoTarget = false; // true if the servo should be extended
+uint8_t targetPress = 0;
+uint8_t numPressed = 0; // number of times button pressed
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -161,7 +165,7 @@ void startConveyorService(bool forwards) {
   conveyor->setSpeed(forwards ? 400 : -400);
 }
 
-void moveRack(uint8_t target) {
+void moveRackService(uint8_t target) {
   targetRack = target;
   if (targetRack > currentRack) {
     // rack needs to drive forwards
@@ -246,6 +250,29 @@ void loop() {
     }
     break;
   case pressButton:
+    if (t >= timerTarget) {
+      if (servoTarget) {
+        // servo finished extending, bring it back
+        buttonServo.write(PRESS_STORE_ANGLE);
+        timerTarget = t + 2;
+        servoTarget = false;
+        numPressed++;
+        nextState = pressButton;
+      } else {
+        // servo finished retracting, extend again
+        if (numPressed == targetPress) {
+          // button has been pressed enough times
+          numPressed = 0;
+          targetPress = 0;
+          nextState = waitingForData;
+        } else {
+          // button needs to be pressed again
+          buttonServo.write(PRESS_ANGLE);
+          timerTarget = t + 2;
+          nextState = pressButton;
+        }
+      }
+    }
     break;
   case waitingForBlock:
     // TODO
@@ -267,6 +294,7 @@ void loop() {
         if (needsDiscard) {
           discardServo.write(DISCARD_ANGLE);
           // todo, figure out how long servo takes to swing
+          servoTarget = true;
           nextState = discarding;
         } else {
           startConveyorService(true);
@@ -276,13 +304,81 @@ void loop() {
       }
     }
   case waitingForData:
+    // should be able to:
+    // - drive any direction
+    // turn left/right
+    // press button X times
+    // drive rack to X pos
+    // discard
+
+    // wireless strategy:
+    // send a 3 byte packet
+    // START state parameter
+    if (xbee.available() >= 3) {
+      if (xbee.read() == START_MESSAGE) {
+        nextState = static_cast<State>(xbee.read());
+        char param = xbee.read();
+
+        if (nextState == driving) {
+          timerTarget = t + 5;
+          switch (param) {
+          case 'f':
+            x_dot = 1;
+            y_dot = 0;
+            theta_dot = 0;
+            break;
+          case 'b':
+            x_dot = -1;
+            y_dot = 0;
+            theta_dot = 0;
+            break;
+          case 'l':
+            x_dot = 0;
+            y_dot = -1;
+            theta_dot = 0;
+            break;
+          case 'r':
+            x_dot = 0;
+            y_dot = 1;
+            theta_dot = 0;
+          case 'L':
+            x_dot = 0;
+            y_dot = 0;
+            theta_dot = 1;
+            break;
+          case 'R':
+            x_dot = 0;
+            y_dot = 0;
+            theta_dot = -1;
+            break;
+          default:
+            x_dot = 0;
+            y_dot = 0;
+            theta_dot = 0;
+          }
+        } else if (nextState == pressButton) {
+          targetPress = param;
+          timerTarget = t + 2;
+          buttonServo.write(PRESS_ANGLE);
+        } else if (nextState == discarding) {
+          discardServo.write(DISCARD_ANGLE);
+          timerTarget = t + 2;
+        } else if (nextState == movingRack) {
+          moveRackService(param);
+        } else if (nextState == dispensing) {
+          startConveyorService(true);
+          timerTarget = t + param;
+        }
+      }
+    }
     break;
   case discarding:
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
-        discardServo.write(0);
+        discardServo.write(DISCARD_STORE_ANGLE);
         timerTarget = t + 2;
+        servoTarget = false;
         nextState = discarding;
       } else {
         // servo finished retracting, done discarding
