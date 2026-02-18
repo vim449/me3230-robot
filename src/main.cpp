@@ -8,7 +8,7 @@
 #include <Arduino.h>
 
 // turn off when not connected to pc for performance
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 bool shouldPrint = true;
 #endif
@@ -31,7 +31,7 @@ const uint8_t hallEffectPin = A6;
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
 L298N *drive_motors[3];
-L298N conveyor = L298N(conveyor_PWM, conveyor_C, conveyor_D);
+L298N *conveyor;
 L298N *rack;
 PWMServo buttonServo, discardServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
@@ -113,6 +113,7 @@ void motorPinSetup() {
     encoders[1] = new Encoder(encoderPins[2], encoderPins[3]);
     drive_motors[2] = new L298N(M3_PWM, M3_C, M3_D);
     encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
+    conveyor = new L298N(conveyor_PWM, conveyor_C, conveyor_D);
     rack = new L298N(rack_PWM, rack_C, rack_D);
     motors_exist = true;
   }
@@ -120,7 +121,10 @@ void motorPinSetup() {
   for (auto &motor : drive_motors) {
     motor->init();
   }
-  conveyor.init();
+
+  drive_motors[1]->flip(true);
+  drive_motors[2]->flip(true);
+  conveyor->init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
   discardServo.attach(discardServo_PWM);
@@ -156,7 +160,7 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
 }
 
 void startConveyorService(bool forwards) {
-  conveyor.setSpeed(forwards ? 400 : -400);
+  conveyor->setSpeed(forwards ? 400 : -400);
 }
 
 void moveRackService(uint8_t target) {
@@ -183,7 +187,7 @@ void reset() {
   for (auto &motor : drive_motors) {
     motor->setBrake(400);
   }
-  conveyor.setBrake(400);
+  conveyor->setBrake(400);
   rack->setBrake(400);
   // TODO reset encoders
 
@@ -222,11 +226,12 @@ void loop() {
       // finished driving, for now go back to waiting for instructions
       for (auto &motor : drive_motors) {
         motor->setBrake(400);
-        x_dot = 0;
-        y_dot = 0;
-        theta_dot = 0;
-        nextState = waitingForData;
       }
+      x_dot = 0;
+      y_dot = 0;
+      theta_dot = 0;
+      nextState = waitingForData;
+    } else {
       // TODO, refactor to not be open loop control
       controlMotors(x_dot, y_dot, theta_dot);
     }
@@ -239,7 +244,7 @@ void loop() {
       Serial.println("Entered state dispensing");
 #endif
     if (t >= timerTarget) {
-      conveyor.setBrake(400);
+      conveyor->setBrake(400);
       stored[0] = stored[1];
       stored[1] = stored[2];
       stored[2] = none;
@@ -347,9 +352,6 @@ void loop() {
         nextState = numToState(xbee.read());
         char param = xbee.read();
 
-        for (int i = 1; i > 10; i++) {
-          xbee.read(); // flush xbee entirely
-        }
         if (nextState == driving) {
           timerTarget = t + 1;
           switch (param) {
