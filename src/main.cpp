@@ -165,15 +165,15 @@ void moveRackService(uint8_t target) {
   targetRack = target;
   if (targetRack > currentRack) {
     // rack needs to drive forwards
-    Serial.println("Rack driving forwards");
+    // Serial.println("Rack driving forwards");
     rack->setSpeed(400); // TODO, determine if this is a reasonable speed
   } else if (targetRack < currentRack) {
     // rack needs to drive backwards
-    Serial.println("Rack driving backwards");
+    // Serial.println("Rack driving backwards");
     rack->setSpeed(-400);
   } else {
     // somehow this function was called with the rack in the target pos
-    Serial.println("Something went wrong");
+    // Serial.println("Something went wrong");
     rack->setBrake(400);
   }
 }
@@ -263,16 +263,20 @@ void loop() {
 #endif
     if (t >= timerTarget) {
       if (servoTarget) {
-        // servo finished extending, bring it back
+// servo finished extending, bring it back
+#ifdef DEBUG
         Serial.println("Extended");
+#endif
         buttonServo.write(PRESS_STORE_ANGLE);
         timerTarget = t + 0.5;
         servoTarget = false;
         numPressed++;
         nextState = pressButton;
       } else {
-        // servo finished retracting, extend again
+// servo finished retracting, extend again
+#ifdef DEBUG
         Serial.println("Retracted");
+#endif
         if (numPressed == targetPress) {
           // button has been pressed enough times
           numPressed = 0;
@@ -337,7 +341,9 @@ void loop() {
     // START state parameter
     if (xbee.available() >= 3) {
       if (xbee.read() == START_MESSAGE) {
+#ifdef DEBUG
         Serial.println("XBEE triggered");
+#endif
         nextState = numToState(xbee.read());
         char param = xbee.read();
 
@@ -388,7 +394,7 @@ void loop() {
           servoTarget = true;
         } else if (nextState == discarding) {
           discardServo.write(DISCARD_ANGLE);
-          timerTarget = t + 2;
+          timerTarget = t + 0.5;
         } else if (nextState == movingRack) {
           moveRackService(param - 48);
         } else if (nextState == dispensing) {
@@ -407,7 +413,7 @@ void loop() {
       if (servoTarget) {
         // servo finished extending, bring it back
         discardServo.write(DISCARD_STORE_ANGLE);
-        timerTarget = t + 2;
+        timerTarget = t + 0.5;
         servoTarget = false;
         nextState = discarding;
       } else {
