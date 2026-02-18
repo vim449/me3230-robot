@@ -7,6 +7,9 @@
 #include "sending.h"
 #include <Arduino.h>
 
+// turn off when not connected to pc for performance
+#define DEBUG
+
 // ALL PINS
 const uint8_t M1_PWM = 6, M1_C = 38, M1_D = 39;
 const uint8_t M2_PWM = 7, M2_C = 40, M2_D = 41;
@@ -204,6 +207,9 @@ void loop() {
 
   switch (state) {
   case driving:
+#ifdef DEBUG
+    Serial.println("Entered state driving");
+#endif
     if (t >= timerTarget) {
       // finished driving, for now go back to waiting for instructions
       for (auto &motor : drive_motors) {
@@ -220,6 +226,9 @@ void loop() {
   case storing:
     break;
   case dispensing:
+#ifdef DEBUG
+    Serial.println("Entered state dispensing");
+#endif
     if (t >= timerTarget) {
       conveyor->setBrake(400);
       stored[0] = stored[1];
@@ -239,6 +248,9 @@ void loop() {
     }
     break;
   case pressButton:
+#ifdef DEBUG
+    Serial.println("Entered state pressButton");
+#endif
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
@@ -268,6 +280,9 @@ void loop() {
     // NOT NEEDED FOR PM6
     break;
   case movingRack:
+#ifdef DEBUG
+    Serial.println("Entered state movingRack");
+#endif
     if (digitalRead(limitPins[targetRack]) == LOW) {
       // rack is at target
       rack->setBrake(400);
@@ -293,6 +308,9 @@ void loop() {
       }
     }
   case waitingForData:
+#ifdef DEBUG
+    Serial.println("Entered state waitingForData");
+#endif
     // should be able to:
     // - drive any direction
     // turn left/right
@@ -362,6 +380,9 @@ void loop() {
     }
     break;
   case discarding:
+#ifdef DEBUG
+    Serial.println("Entered state discarding");
+#endif
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
