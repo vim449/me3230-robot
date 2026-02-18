@@ -9,6 +9,9 @@
 
 // turn off when not connected to pc for performance
 #define DEBUG
+#ifdef DEBUG
+bool shouldPrint = true;
+#endif
 
 // ALL PINS
 const uint8_t M1_PWM = 6, M1_C = 38, M1_D = 39;
@@ -89,6 +92,7 @@ bool needsDiscard = false;
 
 void serialSetup() {
   Serial.begin(USB_BAUD);
+  Serial.println("Initialized XBEE");
   xbee.begin(XBEE_BAUD);
 }
 
@@ -161,12 +165,15 @@ void moveRackService(uint8_t target) {
   targetRack = target;
   if (targetRack > currentRack) {
     // rack needs to drive forwards
+    Serial.println("Rack driving forwards");
     rack->setSpeed(400); // TODO, determine if this is a reasonable speed
   } else if (targetRack < currentRack) {
     // rack needs to drive backwards
+    Serial.println("Rack driving backwards");
     rack->setSpeed(-400);
   } else {
     // somehow this function was called with the rack in the target pos
+    Serial.println("Something went wrong");
     rack->setBrake(400);
   }
 }
@@ -199,7 +206,7 @@ void loop() {
 
   // check for software stop
   // waitingForData checks for data using a different routine
-  if (xbee.available() > 0 && state != waitingForData) {
+  if (state != waitingForData && xbee.available() > 0) {
     if (xbee.read() == SOFTWARE_STOP) {
       reset();
     }
@@ -208,7 +215,8 @@ void loop() {
   switch (state) {
   case driving:
 #ifdef DEBUG
-    Serial.println("Entered state driving");
+    if (shouldPrint)
+      Serial.println("Entered state driving");
 #endif
     if (t >= timerTarget) {
       // finished driving, for now go back to waiting for instructions
@@ -227,7 +235,8 @@ void loop() {
     break;
   case dispensing:
 #ifdef DEBUG
-    Serial.println("Entered state dispensing");
+    if (shouldPrint)
+      Serial.println("Entered state dispensing");
 #endif
     if (t >= timerTarget) {
       conveyor->setBrake(400);
@@ -249,18 +258,21 @@ void loop() {
     break;
   case pressButton:
 #ifdef DEBUG
-    Serial.println("Entered state pressButton");
+    if (shouldPrint)
+      Serial.println("Entered state pressButton");
 #endif
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
+        Serial.println("Extended");
         buttonServo.write(PRESS_STORE_ANGLE);
-        timerTarget = t + 2;
+        timerTarget = t + 0.5;
         servoTarget = false;
         numPressed++;
         nextState = pressButton;
       } else {
         // servo finished retracting, extend again
+        Serial.println("Retracted");
         if (numPressed == targetPress) {
           // button has been pressed enough times
           numPressed = 0;
@@ -269,7 +281,8 @@ void loop() {
         } else {
           // button needs to be pressed again
           buttonServo.write(PRESS_ANGLE);
-          timerTarget = t + 2;
+          servoTarget = true;
+          timerTarget = t + 0.5;
           nextState = pressButton;
         }
       }
@@ -281,14 +294,14 @@ void loop() {
     break;
   case movingRack:
 #ifdef DEBUG
-    Serial.println("Entered state movingRack");
+    if (shouldPrint)
+      Serial.println("Entered state movingRack");
 #endif
     if (digitalRead(limitPins[targetRack]) == LOW) {
       // rack is at target
       rack->setBrake(400);
       if (targetRack == 0) {
         // at front of robot, determine next state
-
         // For PM6, every actuation should go back to waitingForData
         nextState = waitingForData;
       } else if (targetRack == 1) {
@@ -309,7 +322,8 @@ void loop() {
     }
   case waitingForData:
 #ifdef DEBUG
-    Serial.println("Entered state waitingForData");
+    if (shouldPrint)
+      Serial.println("Entered state waitingForData");
 #endif
     // should be able to:
     // - drive any direction
@@ -323,9 +337,13 @@ void loop() {
     // START state parameter
     if (xbee.available() >= 3) {
       if (xbee.read() == START_MESSAGE) {
-        nextState = static_cast<State>(xbee.read());
+        Serial.println("XBEE triggered");
+        nextState = numToState(xbee.read());
         char param = xbee.read();
 
+        for (int i = 1; i > 10; i++) {
+          xbee.read(); // flush xbee entirely
+        }
         if (nextState == driving) {
           timerTarget = t + 5;
           switch (param) {
@@ -364,24 +382,26 @@ void loop() {
             theta_dot = 0;
           }
         } else if (nextState == pressButton) {
-          targetPress = param;
-          timerTarget = t + 2;
+          targetPress = param - 48; // convert from ascii to dec
+          timerTarget = t + 0.5;
           buttonServo.write(PRESS_ANGLE);
+          servoTarget = true;
         } else if (nextState == discarding) {
           discardServo.write(DISCARD_ANGLE);
           timerTarget = t + 2;
         } else if (nextState == movingRack) {
-          moveRackService(param);
+          moveRackService(param - 48);
         } else if (nextState == dispensing) {
           startConveyorService(true);
-          timerTarget = t + param;
+          timerTarget = t + param - 48;
         }
       }
     }
     break;
   case discarding:
 #ifdef DEBUG
-    Serial.println("Entered state discarding");
+    if (shouldPrint)
+      Serial.println("Entered state discarding");
 #endif
     if (t >= timerTarget) {
       if (servoTarget) {
@@ -397,5 +417,12 @@ void loop() {
     }
     break;
   }
+#ifdef DEBUG
+  if (state != nextState) {
+    shouldPrint = true;
+  } else {
+    shouldPrint = false;
+  }
+#endif
   state = nextState;
 }

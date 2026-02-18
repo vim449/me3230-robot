@@ -2,7 +2,7 @@
 #include "sending.h"
 #include <Arduino.h>
 
-SoftwareSerial xbee(10, 11);
+SoftwareSerial xbee(2, 3);
 bool needParam = false;
 bool readyToSend = false;
 State state;
@@ -63,6 +63,7 @@ void loop() {
           break;
         case 'c':
           state = discarding;
+          param = 0;
           needParam = false;
           readyToSend = true;
           break;
@@ -88,10 +89,17 @@ void loop() {
   }
 
   if (readyToSend) {
-    Serial.println("Wrote to Mega");
-    xbee.write(255);
-    xbee.write(state);
+    Serial.print("Wrote to Mega ");
+    Serial.print(START_MESSAGE);
+    Serial.print(" ");
+    Serial.print(stateToNum(state));
+    Serial.print(" ");
+    Serial.println(param);
+
+    xbee.write(START_MESSAGE);
+    xbee.write(stateToNum(state));
     xbee.write(param);
+    delay(20);
     readyToSend = false;
     needParam = false;
     menu();
