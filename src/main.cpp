@@ -31,7 +31,7 @@ const uint8_t hallEffectPin = A6;
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
 L298N *drive_motors[3];
-L298N *conveyor;
+L298N conveyor = L298N(conveyor_PWM, conveyor_C, conveyor_D);
 L298N *rack;
 PWMServo buttonServo, discardServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
@@ -114,14 +114,13 @@ void motorPinSetup() {
     drive_motors[2] = new L298N(M3_PWM, M3_C, M3_D);
     encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
     rack = new L298N(rack_PWM, rack_C, rack_D);
-    conveyor = new L298N(conveyor_PWM, conveyor_C, conveyor_D);
     motors_exist = true;
   }
 
   for (auto &motor : drive_motors) {
     motor->init();
   }
-  conveyor->init();
+  conveyor.init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
   discardServo.attach(discardServo_PWM);
@@ -157,8 +156,7 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
 }
 
 void startConveyorService(bool forwards) {
-  timerTarget = t0 + 2;
-  conveyor->setSpeed(forwards ? 400 : -400);
+  conveyor.setSpeed(forwards ? 400 : -400);
 }
 
 void moveRackService(uint8_t target) {
@@ -185,7 +183,7 @@ void reset() {
   for (auto &motor : drive_motors) {
     motor->setBrake(400);
   }
-  conveyor->setBrake(400);
+  conveyor.setBrake(400);
   rack->setBrake(400);
   // TODO reset encoders
 
@@ -203,6 +201,8 @@ void setup() {
 
 void loop() {
   t = micros() / 1000000. - t0;
+
+  discardServo.write((int)t);
 
   // check for software stop
   // waitingForData checks for data using a different routine
@@ -239,7 +239,7 @@ void loop() {
       Serial.println("Entered state dispensing");
 #endif
     if (t >= timerTarget) {
-      conveyor->setBrake(400);
+      conveyor.setBrake(400);
       stored[0] = stored[1];
       stored[1] = stored[2];
       stored[2] = none;
@@ -268,7 +268,7 @@ void loop() {
         Serial.println("Extended");
 #endif
         buttonServo.write(PRESS_STORE_ANGLE);
-        timerTarget = t + 0.5;
+        timerTarget = t + 1;
         servoTarget = false;
         numPressed++;
         nextState = pressButton;
@@ -286,7 +286,7 @@ void loop() {
           // button needs to be pressed again
           buttonServo.write(PRESS_ANGLE);
           servoTarget = true;
-          timerTarget = t + 0.5;
+          timerTarget = t + 1;
           nextState = pressButton;
         }
       }
@@ -351,7 +351,7 @@ void loop() {
           xbee.read(); // flush xbee entirely
         }
         if (nextState == driving) {
-          timerTarget = t + 5;
+          timerTarget = t + 1;
           switch (param) {
           case 'f':
             x_dot = 1;
@@ -389,12 +389,12 @@ void loop() {
           }
         } else if (nextState == pressButton) {
           targetPress = param - 48; // convert from ascii to dec
-          timerTarget = t + 0.5;
+          timerTarget = t + 1;
           buttonServo.write(PRESS_ANGLE);
           servoTarget = true;
         } else if (nextState == discarding) {
           discardServo.write(DISCARD_ANGLE);
-          timerTarget = t + 0.5;
+          timerTarget = t + 1;
         } else if (nextState == movingRack) {
           moveRackService(param - 48);
         } else if (nextState == dispensing) {
@@ -413,7 +413,7 @@ void loop() {
       if (servoTarget) {
         // servo finished extending, bring it back
         discardServo.write(DISCARD_STORE_ANGLE);
-        timerTarget = t + 0.5;
+        timerTarget = t + 1;
         servoTarget = false;
         nextState = discarding;
       } else {
