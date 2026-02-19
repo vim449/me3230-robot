@@ -1,6 +1,9 @@
 *-backups/*
-robot.kicad_sch-bak
 .cache/
 .pio/
 compile_commands.json
 .vscode/
+fp-info-cache
+*.lck
+*.*-bak
+*.kicad_prl

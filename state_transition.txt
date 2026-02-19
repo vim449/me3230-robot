@@ -1,0 +1,80 @@
+@startuml
+' Use [*] as starting and ending point.
+' Use --> for arrows.
+
+' optionally, leave out empty state descriptions
+hide empty description
+
+state "Waiting for Start" as wait
+wait --> drive : Start signal received / set targetPos to mine, begin driving
+
+state "Drive Loop" as drive {
+    state "Estimate Position" as pos
+    pos : Use a EKF to estimate position based on\n encoders, distance sensors, line sensor
+    state "Calculate Heading Vector" as heading
+    heading : Calculate heading vector as (targetPos - currentPos)/time\n vector has [x,y,theta] components
+    state "Command Motors" as command
+    command : J^-1*heading vector gives speeds in motor space\nMobility Jacobian is constant wrt t so can be hardcoded
+
+    [*] --> heading
+    pos --> heading
+    heading --> command
+    command --> pos
+    pos --> [*] : abs(currentPos-targetPos) < threshold /\n turn off Motors
+}
+
+drive --> deposit : at chest, dispense blocks
+store --> drive : blocksStored == 3 & can craft /\n set targetPos to craft, begin driving
+store --> drive : blocksStored == 3 & no craft /\n set targetPos to chest, begin driving
+drive --> deposit : at crafting table, dispense blocks
+deposit --> drive : blocksStored == 0 /\n set targetPos to mine, begin driving
+
+state "Press Button" as pressButton {
+  state "Firing Solenoid" as firing
+  state "Charging Solenoid" as charging
+  state "Waiting for Block" as fall
+  [*] --> firing : set solenoid HIGH, start timer
+  firing --> charging : time elapsed /\n set solenoid LOW, start timer
+  charging --> firing : time elapsed /\n set solenoid HIGH, start timer
+  charging --> fall : hitsTaken == numHits / start timer
+  fall --> [*] : time elapsed / hall effect to set isSilverfish
+}
+pressButton : set numHits based on isSilverfish and current sword/pick
+
+drive -> pressButton : at mines
+pressButton --> pressButton : isSilverfish HIGH / press button again
+State1 --> pressButton : done discarding / mine again
+store --> pressButton : blocksStored < 3 / mine again
+
+pressButton --> State1 : block not wanted
+pressButton --> store : block wanted
+
+state "Discard Block" as State1 {
+  state "Ejecting Pinion" as State2
+  state "Recentering Pinion" as State3
+  [*] --> State2 : incorrect block / Rack motor on
+  State2 --> State3 : Limit Switch Tripped / Reverse rack motor
+  State3 --> [*] : Time Elapsed / Rack motor off
+}
+
+state "Store Block" as store {
+    state "Raise Shovel" as raise
+    [*] --> raise : storage started / conveyor motor on, start timer
+    raise --> [*] : time elapsed / conveyor motor off
+}
+
+state "Deposit Block" as deposit {
+  state "Dispensing Pinion" as extend
+  state "Drive Conveyor" as driveConveyor
+  state "Strafe Adjustment" as strafe
+  state "Recentering Pinion" as centering
+
+  [*] --> extend
+  extend --> driveConveyor : Limit Switch Tripped /\n rack motor off, conveyor off
+  driveConveyor --> strafe : Optical Interrupt /\n conveyor off, begin driving
+  strafe --> driveConveyor : Encoder Target Reached /\n stop driving, conveyor on
+  driveConveyor --> centering : Optical Interrupt /\n conveyor off, rack motor on
+  centering --> [*]
+}
+
+@enduml
