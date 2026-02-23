@@ -4,14 +4,12 @@
 #include "L298N.h"
 #include "PWMServo.h"
 #include "QTRSensors.h"
+#include "extern.h"
+#include "followLine.cpp"
+#include "parseData.cpp"
 #include "sending.h"
+#include "services.cpp"
 #include <Arduino.h>
-
-// turn off when not connected to pc for performance
-// #define DEBUG
-#ifdef DEBUG
-bool shouldPrint = true;
-#endif
 
 // ALL PINS
 const uint8_t M1_PWM = 6, M1_C = 38, M1_D = 39;
@@ -44,17 +42,12 @@ const BLA::Matrix<3, 3, double> motorJacobian = {0,
                                                  sqrt(3) / 0.096,
                                                  500.0 / 48.0,
                                                  -158.688 / 48.0};
-#define DISCARD_ANGLE 180
-#define DISCARD_STORE_ANGLE 0
-#define PRESS_ANGLE 180
-#define PRESS_STORE_ANGLE 0
 
 // sensors
 QTRSensors lineQtr;
 QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
-const uint8_t qtrSensorCount = 8;
-uint16_t qtrSensorValues[qtrSensorCount];
+uint16_t lineValues[LINE_COUNT];
 bool limitStates[3] = {
     true, true, true}; // switches are high by default and low when triggered
 Encoder *encoders[3];
@@ -63,24 +56,20 @@ double hallEffect = 0.0;
 // time variables
 double t, t0;
 
-// aliasing to xbee shield
-// HardwareSerial* const xbee = &Serial3;
-#define xbee Serial3
-
 const long XBEE_BAUD = 115200;
 const long USB_BAUD = 9600;
 
 // control variables
-State state;
-State nextState;
-BLA::Matrix<3, 1, double> motorSpeeds = {0, 0, 0};
+State state, nextState;
 double x_dot, y_dot, theta_dot;
-int targetRack = 0;
-int currentRack = 0; // index of limit switch the rack is resting at
+uint8_t targetRack = 0;
+uint8_t currentRack = 0; // index of limit switch the rack is resting at
 double timerTarget = 0;
 bool servoTarget = false; // true if the servo should be extended
 uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
+int16_t encoderCounts[3] = {0, 0, 0};
+double lineD = 0;
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -98,7 +87,7 @@ void serialSetup() {
 
 void controlMotors(double xdot, double ydot, double thetadot) {
   BLA::Matrix<3, 1, double> in = {xdot, ydot, theta_dot};
-  motorSpeeds = motorJacobian * in;
+  BLA::Matrix<3, 1, double> motorSpeeds = motorJacobian * in;
 
   for (int i = 0; i < 3; i++) {
     drive_motors[i]->setSpeed(motorSpeeds(i));
@@ -118,12 +107,11 @@ void motorPinSetup() {
     motors_exist = true;
   }
 
-  for (auto &motor : drive_motors) {
-    motor->init();
+  bool flipTable[3] = {false, false, false};
+  for (int i = 0; i > 3; i++) {
+    drive_motors[i]->init();
+    drive_motors[i]->flip(flipTable[i]);
   }
-
-  drive_motors[1]->flip(true);
-  drive_motors[2]->flip(true);
   conveyor->init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
@@ -135,7 +123,7 @@ void sensorPinSetup() {
   lineQtr.setTypeRC();
   shovelQtr.setTypeRC();
   conveyorQtr.setTypeRC();
-  lineQtr.setSensorPins(lineQtrPins, qtrSensorCount);
+  lineQtr.setSensorPins(lineQtrPins, LINE_COUNT);
   shovelQtr.setSensorPins(shovelQtrPins, 1);
   conveyorQtr.setSensorPins(conveyorQtrPins, 1);
 
@@ -146,6 +134,7 @@ void sensorPinSetup() {
 }
 
 BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
+  // TODO, this is not correct
   BLA::Matrix<3, 3> J;
   J(0, 0) = 1;
   J(0, 1) = 0;
@@ -159,27 +148,6 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
   return J;
 }
 
-void startConveyorService(bool forwards) {
-  conveyor->setSpeed(forwards ? 400 : -400);
-}
-
-void moveRackService(uint8_t target) {
-  targetRack = target;
-  if (targetRack > currentRack) {
-    // rack needs to drive forwards
-    // Serial.println("Rack driving forwards");
-    rack->setSpeed(400); // TODO, determine if this is a reasonable speed
-  } else if (targetRack < currentRack) {
-    // rack needs to drive backwards
-    // Serial.println("Rack driving backwards");
-    rack->setSpeed(-400);
-  } else {
-    // somehow this function was called with the rack in the target pos
-    // Serial.println("Something went wrong");
-    rack->setBrake(400);
-  }
-}
-
 void reset() {
   motorPinSetup();
   sensorPinSetup();
@@ -189,7 +157,7 @@ void reset() {
   }
   conveyor->setBrake(400);
   rack->setBrake(400);
-  // TODO reset encoders
+  memset(&encoderCounts, 0, sizeof(encoderCounts));
 
   t0 = micros() / 1000000.;
   state = waitingForData;
@@ -330,81 +298,7 @@ void loop() {
       }
     }
   case waitingForData:
-#ifdef DEBUG
-    if (shouldPrint)
-      Serial.println("Entered state waitingForData");
-#endif
-    // should be able to:
-    // - drive any direction
-    // turn left/right
-    // press button X times
-    // drive rack to X pos
-    // discard
-
-    // wireless strategy:
-    // send a 3 byte packet
-    // START state parameter
-    if (xbee.available() >= 3) {
-      if (xbee.read() == START_MESSAGE) {
-#ifdef DEBUG
-        Serial.println("XBEE triggered");
-#endif
-        nextState = numToState(xbee.read());
-        char param = xbee.read();
-
-        if (nextState == driving) {
-          timerTarget = t + 1;
-          switch (param) {
-          case 'f':
-            x_dot = 1;
-            y_dot = 0;
-            theta_dot = 0;
-            break;
-          case 'b':
-            x_dot = -1;
-            y_dot = 0;
-            theta_dot = 0;
-            break;
-          case 'l':
-            x_dot = 0;
-            y_dot = -1;
-            theta_dot = 0;
-            break;
-          case 'r':
-            x_dot = 0;
-            y_dot = 1;
-            theta_dot = 0;
-          case 'L':
-            x_dot = 0;
-            y_dot = 0;
-            theta_dot = 1;
-            break;
-          case 'R':
-            x_dot = 0;
-            y_dot = 0;
-            theta_dot = -1;
-            break;
-          default:
-            x_dot = 0;
-            y_dot = 0;
-            theta_dot = 0;
-          }
-        } else if (nextState == pressButton) {
-          targetPress = param - 48; // convert from ascii to dec
-          timerTarget = t + 1;
-          buttonServo.write(PRESS_ANGLE);
-          servoTarget = true;
-        } else if (nextState == discarding) {
-          discardServo.write(DISCARD_ANGLE);
-          timerTarget = t + 1;
-        } else if (nextState == movingRack) {
-          moveRackService(param - 48);
-        } else if (nextState == dispensing) {
-          startConveyorService(true);
-          timerTarget = t + param - 48;
-        }
-      }
-    }
+    parseData();
     break;
   case discarding:
 #ifdef DEBUG
@@ -423,6 +317,9 @@ void loop() {
         nextState = waitingForData;
       }
     }
+    break;
+  case lineFollowing:
+    followLine();
     break;
   }
 #ifdef DEBUG
