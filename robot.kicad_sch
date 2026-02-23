@@ -6896,10 +6896,6 @@
 		(uuid "04efed32-fc78-48b9-8612-24ca01cf444d")
 	)
 	(no_connect
-		(at 80.01 128.27)
-		(uuid "08633a22-42fb-42dc-93a6-1f7f19992e75")
-	)
-	(no_connect
 		(at 39.37 95.25)
 		(uuid "0baaef84-db07-4683-b68a-33c061cc6d53")
 	)
@@ -6930,6 +6926,10 @@
 	(no_connect
 		(at 80.01 138.43)
 		(uuid "2d5c338d-6d54-4981-92cb-473ee7726be6")
+	)
+	(no_connect
+		(at 80.01 118.11)
+		(uuid "2dabd2e8-a20a-44da-95d1-957d2f323848")
 	)
 	(no_connect
 		(at 31.75 207.01)
@@ -9465,7 +9465,7 @@
 		)
 		(uuid "642e1d08-61b3-4751-8082-1e625ef100e9")
 	)
-	(label "D8"
+	(label "D5"
 		(at 128.27 68.58 0)
 		(effects
 			(font
