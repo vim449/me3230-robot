@@ -106,12 +106,12 @@ void loop() {
       Serial.print("Wrote to Mega ");
       Serial.print(START_MESSAGE);
       Serial.print(" ");
-      Serial.print(stateToNum(state));
+      Serial.print((byte)state);
       Serial.print(" ");
       Serial.println(param);
 
       xbee.write(START_MESSAGE);
-      xbee.write(stateToNum(state));
+      xbee.write((byte)state);
       xbee.write(param);
       delay(20);
       readyToSend = false;

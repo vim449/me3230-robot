@@ -1,7 +1,7 @@
 // all code that needs to exist on both the uno and mega for wireless
 // transmission state handling is stored here
-
 #pragma once
+
 #include <Arduino.h>
 #define START_MESSAGE 255
 #define SOFTWARE_STOP 200
@@ -18,7 +18,3 @@ enum State {
   waitingForData,
   lineFollowing,
 };
-
-State numToState(uint8_t num) { return (State)num; }
-
-uint8_t stateToNum(State state) { return (byte)state; }

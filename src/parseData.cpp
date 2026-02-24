@@ -1,31 +1,17 @@
+#include "parseData.h"
 #include "extern.h"
-#include "services.cpp"
+#include "services.h"
 
-#ifdef DEBUG
-if (shouldPrint)
-  Serial.println("Entered state waitingForData");
-#endif
-// should be able to:
-// - drive any direction
-// turn left/right
-// press button X times
-// drive rack to X pos
-// discard
-
-// wireless strategy:
-// send a 3 byte packet
-// START state parameter
 void parseData(void) {
   if (xbee.available() >= 3) {
     if (xbee.read() == START_MESSAGE) {
 #ifdef DEBUG
       Serial.println("XBEE triggered");
 #endif
-      nextState = numToState(xbee.read());
+      nextState = (State)xbee.read();
       char param = xbee.read();
 
       if (nextState == driving) {
-        timerTarget = t + 1;
         switch (param) {
         case 'f':
           x_dot = 1;
@@ -73,7 +59,6 @@ void parseData(void) {
         moveRackService(param - 48);
       } else if (nextState == dispensing) {
         startConveyorService(true);
-        timerTarget = t + param - 48;
       }
     }
   }

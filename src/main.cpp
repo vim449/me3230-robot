@@ -1,14 +1,19 @@
+#define DISCARD_ANGLE 180
+#define DISCARD_STORE_ANGLE 0
+#define PRESS_ANGLE 180
+#define PRESS_STORE_ANGLE 0
+#define xbee Serial3
+
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "HardwareSerial.h"
 #include "L298N.h"
 #include "PWMServo.h"
 #include "QTRSensors.h"
-#include "extern.h"
-#include "followLine.cpp"
-#include "parseData.cpp"
+#include "followLine.h"
+#include "parseData.h"
 #include "sending.h"
-#include "services.cpp"
+#include "services.h"
 #include <Arduino.h>
 
 // ALL PINS
@@ -25,6 +30,7 @@ const uint8_t limitPins[2] = {51, 52};
 const uint8_t encoderPins[6] = {2, 3, 18, 19, 20, 21};
 const uint8_t motorCurrentPins[3] = {A3, A4, A5};
 const uint8_t hallEffectPin = A6;
+const uint8_t rangeFinderPin = A0;
 
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
@@ -48,8 +54,8 @@ QTRSensors lineQtr;
 QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
 uint16_t lineValues[LINE_COUNT];
-bool limitStates[3] = {
-    true, true, true}; // switches are high by default and low when triggered
+bool limitStates[2] = {
+    true, true}; // switches are high by default and low when triggered
 Encoder *encoders[3];
 double hallEffect = 0.0;
 
@@ -57,7 +63,7 @@ double hallEffect = 0.0;
 double t, t0;
 
 const long XBEE_BAUD = 115200;
-const long USB_BAUD = 9600;
+const long USB_BAUD = 57600;
 
 // control variables
 State state, nextState;
@@ -178,6 +184,7 @@ void loop() {
 
   // check for software stop
   // waitingForData checks for data using a different routine
+  bool shouldStop = false;
   switch (state) {
   case driving:
 #ifdef DEBUG
@@ -186,18 +193,20 @@ void loop() {
 #endif
     if (xbee.available() > 0) {
       if (xbee.read() == SOFTWARE_STOP) {
-        // finished driving, for now go back to waiting for instructions
-        for (auto &motor : drive_motors) {
-          motor->setBrake(400);
-        }
-        x_dot = 0;
-        y_dot = 0;
-        theta_dot = 0;
-        nextState = waitingForData;
+        shouldStop = true;
       }
     }
-    // TODO, refactor to not be open loop control
-    controlMotors(x_dot, y_dot, theta_dot);
+    if (getRangeDistance() < 4) {
+      shouldStop = true;
+    }
+    if (shouldStop) {
+      // finished driving, for now go back to waiting for instructions
+      stopDriveMotors();
+      nextState = waitingForData;
+    } else {
+      // TODO, refactor to not be open loop control
+      controlMotors(x_dot, y_dot, theta_dot);
+    }
     break;
   case storing:
     break;
@@ -206,21 +215,23 @@ void loop() {
     if (shouldPrint)
       Serial.println("Entered state dispensing");
 #endif
-    if (t >= timerTarget) {
-      conveyor->setBrake(400);
-      stored[0] = stored[1];
-      stored[1] = stored[2];
-      stored[2] = none;
-      // TODO, determine if robot should dispense again
-      if (false) {
-        startConveyorService(true);
-        nextState = dispensing;
-      } else {
-        // TODO, determine needed x_dot, y_dot, theta_dot
-        // nextState = driving;
+    if (xbee.available() > 0) {
+      if (xbee.read() == SOFTWARE_STOP) {
+        conveyor->setBrake(400);
+        stored[0] = stored[1];
+        stored[1] = stored[2];
+        stored[2] = none;
+        // TODO, determine if robot should dispense again
+        if (false) {
+          startConveyorService(true);
+          nextState = dispensing;
+        } else {
+          // TODO, determine needed x_dot, y_dot, theta_dot
+          // nextState = driving;
 
-        // For PM6, every actuation should go back to waitingForData
-        nextState = waitingForData;
+          // For PM6, every actuation should go back to waitingForData
+          nextState = waitingForData;
+        }
       }
     }
     break;
@@ -314,7 +325,11 @@ void loop() {
     }
     break;
   case lineFollowing:
-    followLine(4.0, 0.1);
+    if (shouldStop) {
+      stopDriveMotors();
+    } else {
+      followLine(4.0, 0.1);
+    }
     break;
   }
 #ifdef DEBUG

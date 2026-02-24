@@ -1,7 +1,7 @@
 // this file uses 'extern' to give all other files access
 // to the global variables defined in main.cpp
-
 #pragma once
+
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "L298N.h"
