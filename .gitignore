@@ -1,4 +1,4 @@
-*-backups/*
+**/*-backups/*
 .cache/
 .pio/
 compile_commands.json
