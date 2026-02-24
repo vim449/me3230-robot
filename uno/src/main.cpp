@@ -5,6 +5,7 @@
 SoftwareSerial xbee(2, 3);
 bool needParam = false;
 bool readyToSend = false;
+bool inState = false;
 State state;
 uint8_t param = 0;
 
@@ -45,63 +46,79 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    int arg = Serial.read();
-    if (arg != '\n') {
-      if (!needParam) {
-        // reading a state
-        switch (arg) {
-        case 'a':
-          menu(driving);
-          state = driving;
-          needParam = true;
-          break;
-        case 'b':
-          menu(pressButton);
-          state = pressButton;
-          needParam = true;
-          break;
-        case 'c':
-          state = discarding;
-          param = 0;
-          needParam = false;
-          readyToSend = true;
-          break;
-        case 'd':
-          menu(dispensing);
-          state = dispensing;
-          needParam = true;
-          break;
-        case 'e':
-          menu(movingRack);
-          state = movingRack;
-          needParam = true;
-          break;
-        default:
-          break;
-        }
+  if (inState) {
+    if (Serial.available() > 0) {
+      int arg = Serial.read();
+      if (arg == '1') {
+        inState = false;
+        xbee.write(SOFTWARE_STOP);
+        Serial.println("Sent software stop");
+        menu();
       } else {
-        // reading a param for a state
-        param = arg;
-        readyToSend = true;
+        Serial.println("Ignored");
       }
     }
-  }
+  } else {
+    if (Serial.available() > 0) {
+      int arg = Serial.read();
+      if (arg != '\n') {
+        if (!needParam) {
+          // reading a state
+          switch (arg) {
+          case 'a':
+            menu(driving);
+            state = driving;
+            needParam = true;
+            break;
+          case 'b':
+            menu(pressButton);
+            state = pressButton;
+            needParam = true;
+            break;
+          case 'c':
+            state = discarding;
+            param = 0;
+            needParam = false;
+            readyToSend = true;
+            break;
+          case 'd':
+            menu(dispensing);
+            state = dispensing;
+            needParam = true;
+            break;
+          case 'e':
+            menu(movingRack);
+            state = movingRack;
+            needParam = true;
+            break;
+          default:
+            break;
+          }
+        } else {
+          // reading a param for a state
+          param = arg;
+          readyToSend = true;
+        }
+      }
+    }
 
-  if (readyToSend) {
-    Serial.print("Wrote to Mega ");
-    Serial.print(START_MESSAGE);
-    Serial.print(" ");
-    Serial.print(stateToNum(state));
-    Serial.print(" ");
-    Serial.println(param);
+    if (readyToSend) {
+      Serial.print("Wrote to Mega ");
+      Serial.print(START_MESSAGE);
+      Serial.print(" ");
+      Serial.print(stateToNum(state));
+      Serial.print(" ");
+      Serial.println(param);
 
-    xbee.write(START_MESSAGE);
-    xbee.write(stateToNum(state));
-    xbee.write(param);
-    delay(20);
-    readyToSend = false;
-    needParam = false;
-    menu();
+      xbee.write(START_MESSAGE);
+      xbee.write(stateToNum(state));
+      xbee.write(param);
+      delay(20);
+      readyToSend = false;
+      needParam = false;
+      inState = true;
+
+      Serial.println("Enter 1 to exit current state");
+    }
   }
 }

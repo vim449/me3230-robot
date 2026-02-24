@@ -178,31 +178,26 @@ void loop() {
 
   // check for software stop
   // waitingForData checks for data using a different routine
-  if (state != waitingForData && xbee.available() > 0) {
-    if (xbee.read() == SOFTWARE_STOP) {
-      reset();
-    }
-  }
-
   switch (state) {
   case driving:
 #ifdef DEBUG
     if (shouldPrint)
       Serial.println("Entered state driving");
 #endif
-    if (t >= timerTarget) {
-      // finished driving, for now go back to waiting for instructions
-      for (auto &motor : drive_motors) {
-        motor->setBrake(400);
+    if (xbee.available() > 0) {
+      if (xbee.read() == SOFTWARE_STOP) {
+        // finished driving, for now go back to waiting for instructions
+        for (auto &motor : drive_motors) {
+          motor->setBrake(400);
+        }
+        x_dot = 0;
+        y_dot = 0;
+        theta_dot = 0;
+        nextState = waitingForData;
       }
-      x_dot = 0;
-      y_dot = 0;
-      theta_dot = 0;
-      nextState = waitingForData;
-    } else {
-      // TODO, refactor to not be open loop control
-      controlMotors(x_dot, y_dot, theta_dot);
     }
+    // TODO, refactor to not be open loop control
+    controlMotors(x_dot, y_dot, theta_dot);
     break;
   case storing:
     break;
@@ -319,7 +314,7 @@ void loop() {
     }
     break;
   case lineFollowing:
-    followLine();
+    followLine(4.0, 0.1);
     break;
   }
 #ifdef DEBUG
