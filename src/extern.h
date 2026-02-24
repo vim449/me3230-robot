@@ -7,14 +7,8 @@
 #include "L298N.h"
 #include "PWMServo.h"
 #include "QTRSensors.h"
+#include "globals.h"
 #include "sending.h"
-
-// DEFINITIONS
-#define DISCARD_ANGLE 180
-#define DISCARD_STORE_ANGLE 0
-#define PRESS_ANGLE 180
-#define PRESS_STORE_ANGLE 0
-#define xbee Serial3
 
 // turn off when not connected to pc for performance
 // #define DEBUG

@@ -1,5 +1,6 @@
 #include "parseData.h"
 #include "extern.h"
+#include "globals.h"
 #include "services.h"
 
 void parseData(void) {
@@ -49,12 +50,15 @@ void parseData(void) {
         }
       } else if (nextState == pressButton) {
         targetPress = param - 48; // convert from ascii to dec
-        timerTarget = t + 1;
+        timerTarget = t + PRESS_TIME;
         buttonServo.write(PRESS_ANGLE);
         servoTarget = true;
       } else if (nextState == discarding) {
-        discardServo.write(DISCARD_ANGLE);
-        timerTarget = t + 1;
+        Serial.println("triggered discard");
+        discardServo.write(90);
+        // buttonServo.write(buttonServo.read());
+        timerTarget = t + 2;
+        servoTarget = true;
       } else if (nextState == movingRack) {
         moveRackService(param - 48);
       } else if (nextState == dispensing) {

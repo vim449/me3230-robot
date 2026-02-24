@@ -1,9 +1,3 @@
-#define DISCARD_ANGLE 180
-#define DISCARD_STORE_ANGLE 0
-#define PRESS_ANGLE 180
-#define PRESS_STORE_ANGLE 0
-#define xbee Serial3
-
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "HardwareSerial.h"
@@ -11,26 +5,11 @@
 #include "PWMServo.h"
 #include "QTRSensors.h"
 #include "followLine.h"
+#include "globals.h"
 #include "parseData.h"
 #include "sending.h"
 #include "services.h"
 #include <Arduino.h>
-
-// ALL PINS
-const uint8_t M1_PWM = 6, M1_C = 38, M1_D = 39;
-const uint8_t M2_PWM = 7, M2_C = 40, M2_D = 41;
-const uint8_t M3_PWM = 5, M3_C = 42, M3_D = 43;
-const uint8_t rack_PWM = 46, rack_C = 47, rack_D = 48;
-const uint8_t conveyor_PWM = 45, conveyor_C = 49, conveyor_D = 50;
-const uint8_t buttonServo_PWM = 11, discardServo_PWM = 12;
-const uint8_t lineQtrPins[8] = {23, 25, 27, 29, 31, 33, 35, 37};
-const uint8_t shovelQtrPins[1] = {34};
-const uint8_t conveyorQtrPins[1] = {36};
-const uint8_t limitPins[2] = {51, 52};
-const uint8_t encoderPins[6] = {2, 3, 18, 19, 20, 21};
-const uint8_t motorCurrentPins[3] = {A3, A4, A5};
-const uint8_t hallEffectPin = A6;
-const uint8_t rangeFinderPin = A0;
 
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
@@ -62,9 +41,6 @@ double hallEffect = 0.0;
 // time variables
 double t, t0;
 
-const long XBEE_BAUD = 115200;
-const long USB_BAUD = 57600;
-
 // control variables
 State state, nextState;
 double x_dot, y_dot, theta_dot;
@@ -76,6 +52,8 @@ uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
 int16_t encoderCounts[3] = {0, 0, 0};
 double lineD = 0;
+
+double lineKp = 0, feed_rate = 0;
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -121,7 +99,9 @@ void motorPinSetup() {
   conveyor->init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
+  buttonServo.write(PRESS_STORE_ANGLE);
   discardServo.attach(discardServo_PWM);
+  discardServo.write(0);
 }
 
 void sensorPinSetup() {
@@ -179,8 +159,6 @@ void setup() {
 
 void loop() {
   t = micros() / 1000000. - t0;
-
-  discardServo.write((int)t);
 
   // check for software stop
   // waitingForData checks for data using a different routine
@@ -247,7 +225,7 @@ void loop() {
         Serial.println("Extended");
 #endif
         buttonServo.write(PRESS_STORE_ANGLE);
-        timerTarget = t + 1;
+        timerTarget = t + PRESS_TIME;
         servoTarget = false;
         numPressed++;
         nextState = pressButton;
@@ -265,7 +243,7 @@ void loop() {
           // button needs to be pressed again
           buttonServo.write(PRESS_ANGLE);
           servoTarget = true;
-          timerTarget = t + 1;
+          timerTarget = t + PRESS_TIME;
           nextState = pressButton;
         }
       }
@@ -314,13 +292,15 @@ void loop() {
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
-        discardServo.write(DISCARD_STORE_ANGLE);
+        Serial.println("bringing servo back");
+        discardServo.write(30);
         timerTarget = t + 1;
         servoTarget = false;
         nextState = discarding;
       } else {
         // servo finished retracting, done discarding
         nextState = waitingForData;
+        Serial.println("left discard");
       }
     }
     break;
