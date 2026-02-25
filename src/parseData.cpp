@@ -33,6 +33,7 @@ void parseData(void) {
           x_dot = 0;
           y_dot = 1;
           theta_dot = 0;
+          break;
         case 'L':
           x_dot = 0;
           y_dot = 0;
@@ -48,6 +49,8 @@ void parseData(void) {
           y_dot = 0;
           theta_dot = 0;
         }
+        Serial.print("xdot changed to ");
+        Serial.println(x_dot);
       } else if (nextState == pressButton) {
         targetPress = param - 48; // convert from ascii to dec
         timerTarget = t + PRESS_TIME;
@@ -63,6 +66,7 @@ void parseData(void) {
         moveRackService(param - 48);
       } else if (nextState == dispensing) {
         startConveyorService(true);
+      } else if (nextState == lineFollowing) {
       }
     }
   }

@@ -15,7 +15,7 @@ void menu() {
   // valid options are: Drive, Press Button, discard, dispense
   Serial.println("Please select a command to send to the mega");
   Serial.println("Options are Drive: 'a', Press Button 'b', discard 'c', "
-                 "dispense 'd', move rack 'e'");
+                 "dispense 'd', move rack 'e', line follow 'l'");
 }
 
 void menu(State submenu) {
@@ -35,6 +35,9 @@ void menu(State submenu) {
     break;
   case movingRack:
     Serial.println("Please enter the index of the limit switch to go to");
+    break;
+  case lineFollowing:
+    Serial.println("Now line following");
     break;
   }
 }
@@ -90,6 +93,12 @@ void loop() {
             menu(movingRack);
             state = movingRack;
             needParam = true;
+            break;
+          case 'l':
+            menu(lineFollowing);
+            state = lineFollowing;
+            needParam = false;
+            readyToSend = true;
             break;
           default:
             break;

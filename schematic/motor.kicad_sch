@@ -2293,6 +2293,26 @@
 		)
 		(uuid "1e56d683-50a3-4e7c-bf6d-70800153257b")
 	)
+	(text "encoder B"
+		(exclude_from_sim no)
+		(at 170.18 118.618 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "2bbe5ef4-90c5-4d97-b979-0e9097d23c2a")
+	)
+	(text "encoder A"
+		(exclude_from_sim no)
+		(at 170.18 121.158 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "3790f32c-46e7-438c-bf5c-771cedd96cf4")
+	)
 	(text "Red"
 		(exclude_from_sim no)
 		(at 169.164 50.8 0)
@@ -2313,6 +2333,16 @@
 		)
 		(uuid "53ce99ef-3d6d-4885-aef8-c118bae1de1a")
 	)
+	(text "encoder A"
+		(exclude_from_sim no)
+		(at 170.434 80.01 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "60a8de10-b336-4887-b3bc-6b3101bc6e4e")
+	)
 	(text "Yellow"
 		(exclude_from_sim no)
 		(at 169.164 40.64 0)
@@ -2322,6 +2352,16 @@
 			)
 		)
 		(uuid "61e07bf1-275f-4e00-8f2a-6b9c1ffe3046")
+	)
+	(text "encoder B"
+		(exclude_from_sim no)
+		(at 170.434 77.47 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "94fff865-2903-4684-8aa8-3e88bd519b57")
 	)
 	(text "White"
 		(exclude_from_sim no)

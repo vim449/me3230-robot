@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "HardwareSerial.h"
@@ -18,15 +20,16 @@ L298N *conveyor;
 L298N *rack;
 PWMServo buttonServo, discardServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
+// TODO, this shit fucked
 const BLA::Matrix<3, 3, double> motorJacobian = {0,
                                                  1000.0 / 48.0,
-                                                 158.688 / 48.0,
+                                                 158.688 / 18.0,
                                                  sqrt(3) / 0.096,
                                                  -500.0 / 48.0,
-                                                 158.688 / 48.0,
+                                                 158.688 / 18.0,
                                                  sqrt(3) / 0.096,
                                                  500.0 / 48.0,
-                                                 -158.688 / 48.0};
+                                                 -158.688 / 18.0};
 
 // sensors
 QTRSensors lineQtr;
@@ -39,7 +42,7 @@ Encoder *encoders[3];
 double hallEffect = 0.0;
 
 // time variables
-double t, t0;
+double t, t0, print_time;
 
 // control variables
 State state, nextState;
@@ -51,9 +54,9 @@ bool servoTarget = false; // true if the servo should be extended
 uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
 int16_t encoderCounts[3] = {0, 0, 0};
-double lineD = 0;
-
-double lineKp = 0, feed_rate = 0;
+double range = 0;
+bool rangeSet = false;
+double rangeAlpha = 0.05;
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -69,17 +72,9 @@ void serialSetup() {
   xbee.begin(XBEE_BAUD);
 }
 
-void controlMotors(double xdot, double ydot, double thetadot) {
-  BLA::Matrix<3, 1, double> in = {xdot, ydot, theta_dot};
-  BLA::Matrix<3, 1, double> motorSpeeds = motorJacobian * in;
-
-  for (int i = 0; i < 3; i++) {
-    drive_motors[i]->setSpeed(motorSpeeds(i));
-  }
-}
-
 void motorPinSetup() {
   if (!motors_exist) {
+    Serial.println("Created Motors!");
     drive_motors[0] = new L298N(M1_PWM, M1_C, M1_D);
     encoders[0] = new Encoder(encoderPins[0], encoderPins[1]);
     drive_motors[1] = new L298N(M2_PWM, M2_C, M2_D);
@@ -91,8 +86,8 @@ void motorPinSetup() {
     motors_exist = true;
   }
 
-  bool flipTable[3] = {false, false, false};
-  for (int i = 0; i > 3; i++) {
+  bool flipTable[3] = {false, false, true};
+  for (int i = 0; i < 3; i++) {
     drive_motors[i]->init();
     drive_motors[i]->flip(flipTable[i]);
   }
@@ -135,6 +130,7 @@ BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
 }
 
 void reset() {
+  Serial.println("Reset triggered");
   motorPinSetup();
   sensorPinSetup();
   // kill all motors
@@ -160,21 +156,43 @@ void setup() {
 void loop() {
   t = micros() / 1000000. - t0;
 
+  // line following dev
+  //  PRINT STATEMENTS
+  //  non-blocking way to delay printing
+  lineQtr.read(lineValues);
+  if (!rangeSet) {
+    range = analogRead(A0);
+  } else {
+    range = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * range;
+  }
+  if ((t - print_time) > 0.25) {
+
+    // This for loop is used to print out variables that are arrays
+    // for (uint8_t i = 0; i < LINE_COUNT; i++) {
+    //   Serial.print(lineValues[i]);
+    //   Serial.print('\t');
+    // }
+
+    // Print any non-array variables here
+    // Serial.println();
+    print_time = t;
+  }
+
   // check for software stop
   // waitingForData checks for data using a different routine
   bool shouldStop = false;
+  if (state != waitingForData && xbee.available() > 0) {
+    if (xbee.read() == SOFTWARE_STOP) {
+      shouldStop = true;
+    }
+  }
   switch (state) {
   case driving:
 #ifdef DEBUG
     if (shouldPrint)
       Serial.println("Entered state driving");
 #endif
-    if (xbee.available() > 0) {
-      if (xbee.read() == SOFTWARE_STOP) {
-        shouldStop = true;
-      }
-    }
-    if (getRangeDistance() < 4) {
+    if (getRangeDistance(range) < 15) {
       shouldStop = true;
     }
     if (shouldStop) {
@@ -182,8 +200,7 @@ void loop() {
       stopDriveMotors();
       nextState = waitingForData;
     } else {
-      // TODO, refactor to not be open loop control
-      controlMotors(x_dot, y_dot, theta_dot);
+      controlMotors();
     }
     break;
   case storing:
@@ -224,7 +241,7 @@ void loop() {
 #ifdef DEBUG
         Serial.println("Extended");
 #endif
-        buttonServo.write(PRESS_STORE_ANGLE);
+        buttonServo.write(30);
         timerTarget = t + PRESS_TIME;
         servoTarget = false;
         numPressed++;
@@ -241,7 +258,7 @@ void loop() {
           nextState = waitingForData;
         } else {
           // button needs to be pressed again
-          buttonServo.write(PRESS_ANGLE);
+          buttonServo.write(60);
           servoTarget = true;
           timerTarget = t + PRESS_TIME;
           nextState = pressButton;
@@ -307,8 +324,9 @@ void loop() {
   case lineFollowing:
     if (shouldStop) {
       stopDriveMotors();
+      nextState = waitingForData;
     } else {
-      followLine(4.0, 0.1);
+      followLine(LINE_FEED, LINE_KP);
     }
     break;
   }

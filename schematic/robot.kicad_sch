@@ -6783,6 +6783,16 @@
 		)
 		(uuid "70dfca22-a159-4f1a-8b29-164193e39c51")
 	)
+	(text "Note to self, flip M1 and M3"
+		(exclude_from_sim no)
+		(at 136.652 87.376 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "94e20ca7-374e-4b8f-90dc-97c0e15ab297")
+	)
 	(text "These Parts Move"
 		(exclude_from_sim no)
 		(at 232.41 21.59 0)

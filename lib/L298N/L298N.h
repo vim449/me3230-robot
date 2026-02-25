@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#define TIMERS_AVAILABLE
+// #define TIMERS_AVAILABLE
 #endif
 
 #include <Arduino.h>
@@ -13,11 +13,11 @@ public:
   L298N(unsigned char ENpin, unsigned char Cpin, unsigned char Dpin);
 
   // PUBLIC METHODS
-  void init();                // Initialize pins and timer if applicable.
+  void init();              // Initialize pins and timer if applicable.
   void setSpeed(int speed); // Set speed for M1.
   // void setM2Speed(int speed); // Set speed for M2.
   // void setSpeeds(int m1Speed, int m2Speed); // Set speed for both Motors.
-  void flip(boolean flip);  // Flip the direction of the speed for M1.
+  void flip(boolean flip); // Flip the direction of the speed for M1.
   // void flipM2(boolean flip);  // Flip the direction of the speed for M2.
   void setBrake(int brake); // brake motor 1
   // void setM2Brake(int brake); // brake motor 2

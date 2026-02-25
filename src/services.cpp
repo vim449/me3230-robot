@@ -27,22 +27,23 @@ void controlMotors() {
   BLA::Matrix<3, 1, double> motorSpeeds = motorJacobian * in;
 
   for (int i = 0; i < 3; i++) {
-    drive_motors[i]->setSpeed(motorSpeeds(i));
+    drive_motors[i]->setSpeed(motorSpeeds(i) * 10);
   }
 }
 
-double getRangeDistance() {
-  int rangeReading = analogRead(A0);
+double getRangeDistance(double range) {
   // TODO, recallibrate
-  float distance = exp(-0.8585 * log10(rangeReading) + 1.424);
-  return distance;
+  return exp(-0.9912 * log(range) + 7.813);
 }
 
 void stopDriveMotors() {
+  Serial.println("Stop Motors called");
   for (auto &motor : drive_motors) {
     motor->setBrake(400);
   }
   x_dot = 0;
   y_dot = 0;
   theta_dot = 0;
+  Serial.print("xdot changed to ");
+  Serial.println(x_dot);
 }
