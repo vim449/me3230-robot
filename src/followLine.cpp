@@ -16,7 +16,7 @@ double lineLocalize() {
   if (!lineFilterInitialized) {
     lineFilterInitialized = true;
     for (int i = 0; i < LINE_COUNT; i++) {
-      lineValuesFiltered[i] = lineValues[i];
+      lineValuesFiltered[i] = lineValues[i] - LINE_BIAS[i];
     }
   }
   for (int i = 0; i < LINE_COUNT; i++) {
