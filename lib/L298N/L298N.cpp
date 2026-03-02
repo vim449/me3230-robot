@@ -75,10 +75,10 @@ void L298N::setSpeed(int speed) {
     else
       *OCRB[_timer] = speed;
   } else {
-    analogWrite(_PWM, speed * 51 / 80); // map 400 to 255
+    analogWrite(_PWM, speed * 51.0 / 80.0); // map 400 to 255
   }
 #else
-  analogWrite(_PWM, speed * 51 / 80); // map 400 to 255
+  analogWrite(_PWM, speed * 51.0 / 80.0); // map 400 to 255
 #endif
 }
 
@@ -106,9 +106,9 @@ void L298N::setBrake(int brake) {
     else
       *OCRB[_timer - 1] = brake;
   } else {
-    analogWrite(_PWM, brake * 51 / 80); // map 400 to 255
+    analogWrite(_PWM, brake * 51.0 / 80.0); // map 400 to 255
   }
 #else
-  analogWrite(_PWM, brake * 51 / 80); // map 400 to 255
+  analogWrite(_PWM, brake * 51.0 / 80.0); // map 400 to 255
 #endif
 }

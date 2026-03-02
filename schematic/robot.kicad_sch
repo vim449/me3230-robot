@@ -15307,186 +15307,6 @@
 				(justify left top)
 			)
 		)
-		(pin "MC1" input
-			(at 143.51 38.1 180)
-			(uuid "5881c73f-714b-4aac-9cbb-c96b4f6b3ac0")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC2" input
-			(at 143.51 40.64 180)
-			(uuid "3bc8f992-4cfb-4e21-afc1-8c564bf547f2")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC3" input
-			(at 143.51 43.18 180)
-			(uuid "5e600306-26ba-4c78-85a2-893cdacbe291")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC4" input
-			(at 143.51 45.72 180)
-			(uuid "33d68856-3d15-485d-a271-39a50baae0d0")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC5" input
-			(at 143.51 48.26 180)
-			(uuid "6b1a88d9-e254-4d37-9a01-a0bbee043f50")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC6" input
-			(at 143.51 50.8 180)
-			(uuid "d87f5d87-9efc-4eb7-8559-e78c55042df1")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC7" input
-			(at 143.51 53.34 180)
-			(uuid "be71a8bc-beb1-4ff5-8973-5e5255517de8")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC8" input
-			(at 143.51 55.88 180)
-			(uuid "83beebcd-bfcc-4955-a832-d79936727c6b")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC9" input
-			(at 143.51 58.42 180)
-			(uuid "5f68c1fe-5aaa-4523-8948-e5ad668e669e")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC10" input
-			(at 143.51 60.96 180)
-			(uuid "fe0ecd6a-7e0a-4b41-b38c-2802277299d9")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC11" input
-			(at 143.51 63.5 180)
-			(uuid "e0281a17-9a56-41a1-ad7e-0c21bc0e40cd")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC12" input
-			(at 143.51 66.04 180)
-			(uuid "32316936-0c62-447a-9d97-c5355d251ebe")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC13" input
-			(at 143.51 68.58 180)
-			(uuid "9ecc523b-4d3a-48fd-bc4e-852f605009d4")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC14" input
-			(at 143.51 71.12 180)
-			(uuid "2234e751-d974-46c5-af59-294654b76d07")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC15" input
-			(at 143.51 73.66 180)
-			(uuid "a34c0d40-7972-4da2-affc-b5f15ac6413e")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC16" input
-			(at 143.51 76.2 180)
-			(uuid "59af0c89-103b-4d03-990c-c2e5d58fba45")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC17" input
-			(at 143.51 78.74 180)
-			(uuid "4ef69f4c-90d9-4f37-9664-e98c51709d59")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "MC18" input
-			(at 143.51 81.28 180)
-			(uuid "26c9eb1f-45a3-41f1-ad7b-fdd72b2ea91b")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
 		(pin "GND" input
 			(at 157.48 33.02 90)
 			(uuid "939375ba-71ff-4a96-a35e-16f476f56655")
@@ -15695,6 +15515,186 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+		(pin "MC1_1" input
+			(at 143.51 38.1 180)
+			(uuid "bfa22094-1277-4167-b5f7-f5eb88b34cdd")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC1_2" input
+			(at 143.51 40.64 180)
+			(uuid "0b4dd684-ea3e-4a3d-94c0-2e3026baa7ae")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC1_3" input
+			(at 143.51 43.18 180)
+			(uuid "d24fe0b7-6e54-4a64-9af7-783443cd971c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC1_4" input
+			(at 143.51 45.72 180)
+			(uuid "8ac75cee-8575-432e-b05a-d25ddc1d9516")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC1_5" input
+			(at 143.51 48.26 180)
+			(uuid "e92ec78d-5db2-4597-af0e-5379b852c866")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC1_6" input
+			(at 143.51 50.8 180)
+			(uuid "2db185e4-f84f-4f16-8f7a-47073280889d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_1" input
+			(at 143.51 53.34 180)
+			(uuid "0ebd4807-520a-4bde-b504-0b2c09557c04")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_2" input
+			(at 143.51 55.88 180)
+			(uuid "eb3bf746-3fd9-4266-91ce-e8d2e6f20378")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_3" input
+			(at 143.51 58.42 180)
+			(uuid "706901c3-e87d-420c-956d-bf492d50ac43")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_4" input
+			(at 143.51 60.96 180)
+			(uuid "6109e885-a555-43a7-9457-99aed3ac0652")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_5" input
+			(at 143.51 63.5 180)
+			(uuid "50bcb735-88ee-4d5c-b86a-b9a340bdbce3")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC2_6" input
+			(at 143.51 66.04 180)
+			(uuid "a42f8c76-828f-4737-a39f-6e48ec055b16")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_1" input
+			(at 143.51 68.58 180)
+			(uuid "8688f822-781f-4d6d-8718-0af1a1cb8e33")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_2" input
+			(at 143.51 71.12 180)
+			(uuid "582ab120-9745-490f-93b4-893e666ce946")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_3" input
+			(at 143.51 73.66 180)
+			(uuid "541d6fdc-bfca-4ac6-b8f2-a6ba8b1f9d1b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_4" input
+			(at 143.51 76.2 180)
+			(uuid "aae3a9af-ea63-4a89-bce4-10f1194366b6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_5" input
+			(at 143.51 78.74 180)
+			(uuid "6c731939-0c2c-4c17-9336-1f62fb2cbf05")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MC3_6" input
+			(at 143.51 81.28 180)
+			(uuid "b6643940-cbb9-4355-85ce-5c21e1266ec9")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 		(instances

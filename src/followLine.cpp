@@ -5,23 +5,49 @@
 // distance in milimeters
 const double lineArrayDist[LINE_COUNT] = {0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6};
 const uint16_t LINE_BIAS[LINE_COUNT] = {146, 96, 96, 96, 96, 96, 96, 122};
-const double TARGET_LINE = 2.8; // TODO, calibrate this
+const double TARGET_LINE = 2.8;
+double last_time = 0;
 
-void followLine(double feed_rate, double Kp) {
+double lineLocalize() {
+  float alpha = 0.5;
   double lineD = 0;
   double totalVal = 0;
   lineQtr.read(lineValues);
+  if (!lineFilterInitialized) {
+    lineFilterInitialized = true;
+    for (int i = 0; i < LINE_COUNT; i++) {
+      lineValuesFiltered[i] = lineValues[i];
+    }
+  }
   for (int i = 0; i < LINE_COUNT; i++) {
     lineValues[i] -= LINE_BIAS[i];
-    lineD += lineValues[i] * lineArrayDist[i];
-    totalVal += lineValues[i];
+    lineValuesFiltered[i] =
+        alpha * lineValues[i] + (1 - alpha) * lineValuesFiltered[i];
+    lineD += lineValuesFiltered[i] * lineArrayDist[i];
+    totalVal += lineValuesFiltered[i];
   }
-  lineD /= totalVal;
+  return lineD /= totalVal;
+}
+
+void followLine(double feed_rate, double Kp, double Kd, double Ki) {
+  feed_rate = 2.1;
+  Kp = 1.6;
+  Ki = 0.010;
+  Kd = 0.030;
+
+  double linePos = lineLocalize();
   // lineD = lineD / totalVal;
-  double err = lineD - TARGET_LINE;
+  double last_err = line_err;
+  line_err = linePos - TARGET_LINE;
+  // want to sample total err and derivative error in millis, not seconds
+  double d_err = (line_err - last_err) / (t * 1000. - last_time * 1000.);
+  total_line_err += line_err / (t * 1000. - last_time * 1000.);
 
   y_dot = 0;
-  x_dot = constrain(feed_rate - 0.2 * pow(abs(err), 2), 0, 999);
-  theta_dot = -(err * Kp);
-  controlMotors();
+  // x_dot = constrain(feed_rate - 0.015 * pow(abs(line_err), 1.2),
+  // feed_rate / 1.25, feed_rate);
+  x_dot = feed_rate;
+  theta_dot = -(line_err * Kp + d_err * Kd + total_line_err * Ki);
+  controlMotorsClamped(-1.586 / 1.0, 0);
+  last_time = t;
 }

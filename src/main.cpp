@@ -13,6 +13,9 @@
 #include "services.h"
 #include <Arduino.h>
 
+double line_err = 0;
+double total_line_err = 0;
+
 // motors
 bool motors_exist = false; // to ensure motor objects are only created once
 L298N *drive_motors[3];
@@ -20,22 +23,23 @@ L298N *conveyor;
 L298N *rack;
 PWMServo buttonServo, discardServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
-// TODO, this shit fucked
-const BLA::Matrix<3, 3, double> motorJacobian = {0,
-                                                 1000.0 / 48.0,
-                                                 158.688 / 18.0,
-                                                 sqrt(3) / 0.096,
-                                                 -500.0 / 48.0,
-                                                 158.688 / 18.0,
-                                                 sqrt(3) / 0.096,
-                                                 500.0 / 48.0,
-                                                 -158.688 / 18.0};
+const BLA::Matrix<3, 3, float> motorJacobian = {0,
+                                                1000.0 / 4.80,
+                                                1586.88 / 4.80,
+                                                sqrt(3) / 0.0096,
+                                                -500.0 / 4.80,
+                                                1586.88 / 4.80,
+                                                sqrt(3) / 0.0096,
+                                                500.0 / 4.80,
+                                                -1586.88 / 4.80};
 
 // sensors
 QTRSensors lineQtr;
 QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
 uint16_t lineValues[LINE_COUNT];
+uint16_t lineValuesFiltered[LINE_COUNT];
+bool lineFilterInitialized = false;
 bool limitStates[2] = {
     true, true}; // switches are high by default and low when triggered
 Encoder *encoders[3];
@@ -46,14 +50,17 @@ double t, t0, print_time;
 
 // control variables
 State state, nextState;
-double x_dot, y_dot, theta_dot;
+float x_dot, y_dot, theta_dot;
 uint8_t targetRack = 0;
 uint8_t currentRack = 0; // index of limit switch the rack is resting at
 double timerTarget = 0;
+
 bool servoTarget = false; // true if the servo should be extended
 uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
+
 int16_t encoderCounts[3] = {0, 0, 0};
+
 double range = 0;
 bool rangeSet = false;
 double rangeAlpha = 0.05;
@@ -76,11 +83,11 @@ void motorPinSetup() {
   if (!motors_exist) {
     Serial.println("Created Motors!");
     drive_motors[0] = new L298N(M1_PWM, M1_C, M1_D);
-    encoders[0] = new Encoder(encoderPins[0], encoderPins[1]);
+    // encoders[0] = new Encoder(encoderPins[0], encoderPins[1]);
     drive_motors[1] = new L298N(M2_PWM, M2_C, M2_D);
-    encoders[1] = new Encoder(encoderPins[2], encoderPins[3]);
+    // encoders[1] = new Encoder(encoderPins[2], encoderPins[3]);
     drive_motors[2] = new L298N(M3_PWM, M3_C, M3_D);
-    encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
+    // encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
     conveyor = new L298N(conveyor_PWM, conveyor_C, conveyor_D);
     rack = new L298N(rack_PWM, rack_C, rack_D);
     motors_exist = true;
@@ -112,21 +119,19 @@ void sensorPinSetup() {
   for (auto &pin : limitPins) {
     pinMode(pin, INPUT_PULLUP);
   }
-}
 
-BLA::Matrix<3, 3> mapCenterOfRotation(float x, float y) {
-  // TODO, this is not correct
-  BLA::Matrix<3, 3> J;
-  J(0, 0) = 1;
-  J(0, 1) = 0;
-  J(0, 2) = 0;
-  J(1, 0) = 0;
-  J(1, 1) = 1;
-  J(1, 2) = y;
-  J(2, 0) = 0;
-  J(2, 1) = 0;
-  J(2, 2) = 0;
-  return J;
+  // set up for color sensor
+  pinMode(colorS0, OUTPUT);
+  pinMode(colorS1, OUTPUT);
+  pinMode(colorS2, OUTPUT);
+  pinMode(colorS3, OUTPUT);
+  pinMode(colorLED, OUTPUT);
+  pinMode(colorReadPin, INPUT);
+  // frequency scaling
+  digitalWrite(colorS0, HIGH);
+  digitalWrite(colorS1, LOW);
+  // turn on color sensor LED
+  digitalWrite(colorLED, HIGH);
 }
 
 void reset() {
@@ -159,13 +164,12 @@ void loop() {
   // line following dev
   //  PRINT STATEMENTS
   //  non-blocking way to delay printing
-  lineQtr.read(lineValues);
   if (!rangeSet) {
     range = analogRead(A0);
   } else {
     range = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * range;
   }
-  if ((t - print_time) > 0.25) {
+  if ((t - print_time) > 0.1) {
 
     // This for loop is used to print out variables that are arrays
     // for (uint8_t i = 0; i < LINE_COUNT; i++) {
@@ -174,7 +178,7 @@ void loop() {
     // }
 
     // Print any non-array variables here
-    // Serial.println();
+    // Serial.println(line_err);
     print_time = t;
   }
 
@@ -326,7 +330,7 @@ void loop() {
       stopDriveMotors();
       nextState = waitingForData;
     } else {
-      followLine(LINE_FEED, LINE_KP);
+      followLine(0.5, 0.2, 0.1, 0);
     }
     break;
   }

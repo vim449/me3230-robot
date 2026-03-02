@@ -67,6 +67,7 @@ void parseData(void) {
       } else if (nextState == dispensing) {
         startConveyorService(true);
       } else if (nextState == lineFollowing) {
+        startLineFollowing();
       }
     }
   }

@@ -4017,7 +4017,7 @@
 		)
 		(uuid "ff42b70c-7be2-4b33-a808-0eae56ddab69")
 	)
-	(hierarchical_label "MC14"
+	(hierarchical_label "MC3_2"
 		(shape input)
 		(at 27.94 68.58 180)
 		(effects
@@ -4028,7 +4028,7 @@
 		)
 		(uuid "0d9e2d57-99fe-46b1-b612-3bfd541401a4")
 	)
-	(hierarchical_label "MC1"
+	(hierarchical_label "MC1_1"
 		(shape input)
 		(at 27.94 35.56 180)
 		(effects
@@ -4039,7 +4039,7 @@
 		)
 		(uuid "192f9daf-6700-49f8-9328-ac8ccc0950da")
 	)
-	(hierarchical_label "MC13"
+	(hierarchical_label "MC3_1"
 		(shape input)
 		(at 27.94 66.04 180)
 		(effects
@@ -4050,7 +4050,7 @@
 		)
 		(uuid "2abc039d-c424-4d9c-b2c5-915520184548")
 	)
-	(hierarchical_label "MC10"
+	(hierarchical_label "MC2_4"
 		(shape input)
 		(at 27.94 58.42 180)
 		(effects
@@ -4061,7 +4061,7 @@
 		)
 		(uuid "338eb110-7bc5-4522-b597-6a55993f7556")
 	)
-	(hierarchical_label "MC16"
+	(hierarchical_label "MC3_4"
 		(shape input)
 		(at 27.94 73.66 180)
 		(effects
@@ -4116,7 +4116,7 @@
 		)
 		(uuid "4b790129-a5e5-439d-ba9f-9df21ed65f73")
 	)
-	(hierarchical_label "MC11"
+	(hierarchical_label "MC2_5"
 		(shape input)
 		(at 27.94 60.96 180)
 		(effects
@@ -4127,7 +4127,7 @@
 		)
 		(uuid "522d2c59-6b44-4f3a-a8dc-38079afeec15")
 	)
-	(hierarchical_label "MC9"
+	(hierarchical_label "MC2_3"
 		(shape input)
 		(at 27.94 55.88 180)
 		(effects
@@ -4171,7 +4171,7 @@
 		)
 		(uuid "7e1a1efd-b8c5-4879-9fd2-99f33d13ab60")
 	)
-	(hierarchical_label "MC3"
+	(hierarchical_label "MC1_3"
 		(shape input)
 		(at 27.94 40.64 180)
 		(effects
@@ -4204,7 +4204,7 @@
 		)
 		(uuid "82f6cb9b-befc-4452-8e97-cf6ad4620bd0")
 	)
-	(hierarchical_label "MC7"
+	(hierarchical_label "MC2_1"
 		(shape input)
 		(at 27.94 50.8 180)
 		(effects
@@ -4226,7 +4226,7 @@
 		)
 		(uuid "85ed9046-fe96-4a14-bbd8-2b3f0a236bc9")
 	)
-	(hierarchical_label "MC5"
+	(hierarchical_label "MC1_5"
 		(shape input)
 		(at 27.94 45.72 180)
 		(effects
@@ -4248,7 +4248,7 @@
 		)
 		(uuid "8c532d88-a30e-40b4-bdcb-8e0085084952")
 	)
-	(hierarchical_label "MC8"
+	(hierarchical_label "MC2_2"
 		(shape input)
 		(at 27.94 53.34 180)
 		(effects
@@ -4270,7 +4270,7 @@
 		)
 		(uuid "9cbfa4f2-115f-47ff-978a-3ba8d904fc85")
 	)
-	(hierarchical_label "MC12"
+	(hierarchical_label "MC2_6"
 		(shape input)
 		(at 27.94 63.5 180)
 		(effects
@@ -4281,7 +4281,7 @@
 		)
 		(uuid "a091e2fc-1521-4d08-8a5d-a1f8c8cd12fe")
 	)
-	(hierarchical_label "MC6"
+	(hierarchical_label "MC1_6"
 		(shape input)
 		(at 27.94 48.26 180)
 		(effects
@@ -4325,7 +4325,7 @@
 		)
 		(uuid "b8b9c53c-b158-40d6-af85-96a98a9ceaa0")
 	)
-	(hierarchical_label "MC15"
+	(hierarchical_label "MC3_3"
 		(shape input)
 		(at 27.94 71.12 180)
 		(effects
@@ -4336,7 +4336,7 @@
 		)
 		(uuid "bac5b448-0ae1-47e1-8788-dcf4f1e0ec2d")
 	)
-	(hierarchical_label "MC4"
+	(hierarchical_label "MC1_4"
 		(shape input)
 		(at 27.94 43.18 180)
 		(effects
@@ -4369,7 +4369,7 @@
 		)
 		(uuid "d78d6329-55cb-40e1-b973-6c8a811443b4")
 	)
-	(hierarchical_label "MC17"
+	(hierarchical_label "MC3_5"
 		(shape input)
 		(at 27.94 76.2 180)
 		(effects
@@ -4380,7 +4380,7 @@
 		)
 		(uuid "d8c22772-a7e4-4b6b-b86e-c3bdc7d4b38f")
 	)
-	(hierarchical_label "MC2"
+	(hierarchical_label "MC1_2"
 		(shape input)
 		(at 27.94 38.1 180)
 		(effects
@@ -4413,7 +4413,7 @@
 		)
 		(uuid "e1bafcb7-e12d-44f5-8da8-4cd431561128")
 	)
-	(hierarchical_label "MC18"
+	(hierarchical_label "MC3_6"
 		(shape input)
 		(at 27.94 78.74 180)
 		(effects
