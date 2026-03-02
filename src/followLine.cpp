@@ -31,6 +31,7 @@ double lineLocalize() {
 
 void followLine(double feed_rate, double Kp, double Kd, double Ki) {
   feed_rate = 2.1;
+  // TODO, map feed_rate based on wall distance
   Kp = 1.6;
   Ki = 0.010;
   Kd = 0.030;

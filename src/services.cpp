@@ -78,21 +78,32 @@ void controlMotorsClamped(float x, float y) {
   }
 }
 
-double getRangeDistance(double range) {
-  // TODO, recallibrate
-  return exp(-0.9912 * log(range) + 7.813);
+double getRangeDistance(double range, bool side) {
+  if (side == FRONT) {
+    // Front range finder
+    return exp(-0.9912 * log(range) + 7.813);
+  } else {
+    // Back Range finder
+    return exp(-0.9912 * log(range) + 7.813);
+  }
 }
 
 void stopDriveMotors() {
-  Serial.println("Stop Motors called");
   for (auto &motor : drive_motors) {
     motor->setBrake(400);
   }
   x_dot = 0;
   y_dot = 0;
   theta_dot = 0;
-  Serial.print("xdot changed to ");
-  Serial.println(x_dot);
+}
+
+void coastMotors() {
+  for (auto &motor : drive_motors) {
+    motor->setBrake(0);
+  }
+  x_dot = 0;
+  y_dot = 0;
+  theta_dot = 0;
 }
 
 inline float readPulse() {

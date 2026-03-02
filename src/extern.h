@@ -35,6 +35,8 @@ extern QTRSensors shovelQtr;
 extern QTRSensors conveyorQtr;
 extern Encoder *encoders[3];
 
+extern double rangeFront, rangeBack;
+
 // control targets
 extern double t, t0, timerTarget;
 extern State state, nextState;

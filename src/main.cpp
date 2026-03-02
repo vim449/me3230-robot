@@ -61,7 +61,8 @@ uint8_t numPressed = 0; // number of times button pressed
 
 int16_t encoderCounts[3] = {0, 0, 0};
 
-double range = 0;
+double rangeBack = 0;
+double rangeFront = 0;
 bool rangeSet = false;
 double rangeAlpha = 0.05;
 
@@ -161,13 +162,15 @@ void setup() {
 void loop() {
   t = micros() / 1000000. - t0;
 
-  // line following dev
   //  PRINT STATEMENTS
   //  non-blocking way to delay printing
   if (!rangeSet) {
-    range = analogRead(A0);
+    rangeBack = analogRead(A0);
+    rangeFront = analogRead(A1);
+    rangeSet = true;
   } else {
-    range = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * range;
+    rangeBack = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * rangeBack;
+    rangeFront = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * rangeFront;
   }
   if ((t - print_time) > 0.1) {
 
@@ -178,7 +181,10 @@ void loop() {
     // }
 
     // Print any non-array variables here
-    // Serial.println(line_err);
+    Serial.print("Back sensor: ");
+    Serial.print(rangeBack);
+    Serial.println("\t Front sensor");
+    Serial.println(rangeFront);
     print_time = t;
   }
 
@@ -196,7 +202,7 @@ void loop() {
     if (shouldPrint)
       Serial.println("Entered state driving");
 #endif
-    if (getRangeDistance(range) < 15) {
+    if (getRangeDistance(rangeBack, BACK) < 15) {
       shouldStop = true;
     }
     if (shouldStop) {
@@ -313,7 +319,6 @@ void loop() {
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
-        Serial.println("bringing servo back");
         discardServo.write(30);
         timerTarget = t + 1;
         servoTarget = false;
@@ -321,7 +326,6 @@ void loop() {
       } else {
         // servo finished retracting, done discarding
         nextState = waitingForData;
-        Serial.println("left discard");
       }
     }
     break;

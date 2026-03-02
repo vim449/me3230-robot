@@ -7,6 +7,8 @@
 #define PRESS_STORE_ANGLE 30
 #define PRESS_TIME 0.25
 #define xbee Serial3
+#define BACK false
+#define FRONT true
 
 // ALL PINS
 // motor pins
@@ -21,7 +23,8 @@ const uint8_t buttonServo_PWM = 11, discardServo_PWM = 12;
 
 // misc sensor pins
 const uint8_t hallEffectPin = A6;
-const uint8_t rangeFinderPin = A0;
+const uint8_t rangeBackPin = A0;
+const uint8_t rangeFrontPin = A1;
 const uint8_t limitPins[2] = {51, 52};
 
 // reflectance sensors

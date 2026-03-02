@@ -49,15 +49,12 @@ void parseData(void) {
           y_dot = 0;
           theta_dot = 0;
         }
-        Serial.print("xdot changed to ");
-        Serial.println(x_dot);
       } else if (nextState == pressButton) {
         targetPress = param - 48; // convert from ascii to dec
         timerTarget = t + PRESS_TIME;
         buttonServo.write(PRESS_ANGLE);
         servoTarget = true;
       } else if (nextState == discarding) {
-        Serial.println("triggered discard");
         discardServo.write(90);
         // buttonServo.write(buttonServo.read());
         timerTarget = t + 2;
