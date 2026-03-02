@@ -49,6 +49,6 @@ void followLine(double feed_rate, double Kp, double Kd, double Ki) {
   // feed_rate / 1.25, feed_rate);
   x_dot = feed_rate;
   theta_dot = -(line_err * Kp + d_err * Kd + total_line_err * Ki);
-  controlMotorsClamped(-1.586 / 1.0, 0);
+  controlMotorsClamped();
   last_time = t;
 }

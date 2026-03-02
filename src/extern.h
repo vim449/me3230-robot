@@ -24,6 +24,7 @@ extern L298N *conveyor;
 extern L298N *rack;
 extern PWMServo buttonServo, discardServo;
 extern const BLA::Matrix<3, 3, float> motorJacobian;
+extern BLA::Matrix<3, 3> fullJacobian;
 
 // sensors
 extern QTRSensors lineQtr;

@@ -10,6 +10,7 @@ void startLineFollowing() {
   total_line_err = 0; // reset PID integral windup
   lineFilterInitialized =
       false; // line values will jump discontinuously so reset filter
+  mapCenterOfRotation(-1.586, 0, true);
 }
 
 void moveRackService(uint8_t target) {
@@ -44,6 +45,10 @@ BLA::Matrix<3, 3, float> mapCenterOfRotation(float x, float y) {
   return J;
 }
 
+void mapCenterOfRotation(float x, float y, bool overload) {
+  fullJacobian = motorJacobian * mapCenterOfRotation(x, y);
+}
+
 void controlMotors() {
   BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
   BLA::Matrix<3, 1, float> motorSpeeds = motorJacobian * in;
@@ -69,6 +74,20 @@ void controlMotorsClamped(float x, float y) {
   BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
   BLA::Matrix<3, 1, float> motorSpeeds =
       motorJacobian * mapCenterOfRotation(x, y) * in;
+  double max = 400.0;
+  for (int i = 0; i < 3; i++) {
+    max = abs(motorSpeeds(i)) > max ? motorSpeeds(i) : max;
+  }
+  for (int i = 0; i < 3; i++) {
+    drive_motors[i]->setSpeed(motorSpeeds(i) / max * 400.0);
+  }
+}
+
+void controlMotorsClamped() {
+  // Assumes that full rotation jacobian has been pre-cached and just scaless
+  // motor coordinates down by the fastest motor's saturation
+  BLA::Matrix<3, 1> in = {x_dot, y_dot, theta_dot};
+  BLA::Matrix<3, 1> motorSpeeds = fullJacobian * in;
   double max = 400.0;
   for (int i = 0; i < 3; i++) {
     max = abs(motorSpeeds(i)) > max ? motorSpeeds(i) : max;

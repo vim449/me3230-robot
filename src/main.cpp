@@ -32,6 +32,7 @@ const BLA::Matrix<3, 3, float> motorJacobian = {0,
                                                 sqrt(3) / 0.0096,
                                                 500.0 / 4.80,
                                                 -1586.88 / 4.80};
+BLA::Matrix<3, 3> fullJacobian = motorJacobian;
 
 // sensors
 QTRSensors lineQtr;
@@ -333,6 +334,7 @@ void loop() {
     if (shouldStop) {
       stopDriveMotors();
       nextState = waitingForData;
+      fullJacobian = motorJacobian; // reset center of rotation
     } else {
       followLine(0.5, 0.2, 0.1, 0);
     }
