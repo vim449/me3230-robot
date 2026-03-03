@@ -17,4 +17,5 @@ enum State {
   movingRack,
   waitingForData,
   lineFollowing,
+  coasting,
 };

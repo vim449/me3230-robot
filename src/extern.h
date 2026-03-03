@@ -31,7 +31,6 @@ extern QTRSensors lineQtr;
 #define LINE_COUNT 8
 extern uint16_t lineValues[LINE_COUNT];
 extern uint16_t lineValuesFiltered[LINE_COUNT];
-extern bool lineFilterInitialized;
 extern QTRSensors shovelQtr;
 extern QTRSensors conveyorQtr;
 extern Encoder *encoders[3];

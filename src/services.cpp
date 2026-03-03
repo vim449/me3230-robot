@@ -6,13 +6,6 @@ void startConveyorService(bool forwards) {
   conveyor->setSpeed(forwards ? 400 : -400);
 }
 
-void startLineFollowing() {
-  total_line_err = 0; // reset PID integral windup
-  lineFilterInitialized =
-      false; // line values will jump discontinuously so reset filter
-  mapCenterOfRotation(-1.586, 0, true);
-}
-
 void moveRackService(uint8_t target) {
   targetRack = target;
   if (targetRack > currentRack) {
@@ -31,7 +24,6 @@ void moveRackService(uint8_t target) {
 }
 
 BLA::Matrix<3, 3, float> mapCenterOfRotation(float x, float y) {
-  // TODO, find a way to cache total transmission jacobian
   BLA::Matrix<3, 3> J;
   J(0, 0) = 1;
   J(0, 1) = 0;
@@ -46,10 +38,13 @@ BLA::Matrix<3, 3, float> mapCenterOfRotation(float x, float y) {
 }
 
 void mapCenterOfRotation(float x, float y, bool overload) {
+  // stores total mapped jacobian to global variable
+  // yes, i know the overload boolean is a hack, shut up
   fullJacobian = motorJacobian * mapCenterOfRotation(x, y);
 }
 
 void controlMotors() {
+  // note, this does not use the mapped center of rotation, maybe i should, idk
   BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
   BLA::Matrix<3, 1, float> motorSpeeds = motorJacobian * in;
 
@@ -184,3 +179,24 @@ ColorSensing getColorData() {
 
   return data;
 };
+
+float map(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+// this doesn't work, will drive pretty exactly 30 cm forward
+// float rampSpeed(float x) {
+// #define c1 4
+// #define c2 10
+// #define c3 25.2
+
+//   if (x <= c1 || x > 30) {
+//     return 0;
+//   } else if (x <= c2) {
+//     return 0.175 * pow(x - c1, 2) - 7.0 / 360.0 * pow(x - c1, 3);
+//   } else if (x <= c3) {
+//     return 2.1;
+//   } else {
+//     return 175.0 / 4608.0 * pow(x - c3, 3) - 35.0 / 128.0 * pow(x - c3, 2) +
+//            2.1;
+//   }
+// }

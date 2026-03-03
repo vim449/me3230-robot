@@ -40,7 +40,6 @@ QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
 uint16_t lineValues[LINE_COUNT];
 uint16_t lineValuesFiltered[LINE_COUNT];
-bool lineFilterInitialized = false;
 bool limitStates[2] = {
     true, true}; // switches are high by default and low when triggered
 Encoder *encoders[3];
@@ -64,8 +63,8 @@ int16_t encoderCounts[3] = {0, 0, 0};
 
 double rangeBack = 0;
 double rangeFront = 0;
-bool rangeSet = false;
-double rangeAlpha = 0.05;
+const double rangeAlpha = 0.025;
+double distToWall = 0;
 
 // game variables
 enum BlockType { none, wood, stone, iron, diamond };
@@ -151,6 +150,9 @@ void reset() {
   t0 = micros() / 1000000.;
   state = waitingForData;
   nextState = state;
+
+  rangeBack = analogRead(rangeBackPin);
+  rangeFront = analogRead(rangeFrontPin);
 }
 
 void setup() {
@@ -165,15 +167,11 @@ void loop() {
 
   //  PRINT STATEMENTS
   //  non-blocking way to delay printing
-  if (!rangeSet) {
-    rangeBack = analogRead(A0);
-    rangeFront = analogRead(A1);
-    rangeSet = true;
-  } else {
-    rangeBack = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * rangeBack;
-    rangeFront = rangeAlpha * analogRead(A0) + (1 - rangeAlpha) * rangeFront;
-  }
-  if ((t - print_time) > 0.1) {
+  rangeBack =
+      rangeAlpha * analogRead(rangeBackPin) + (1 - rangeAlpha) * rangeBack;
+  rangeFront =
+      rangeAlpha * analogRead(rangeFrontPin) + (1 - rangeAlpha) * rangeFront;
+  if ((t - print_time) > 0.5) {
 
     // This for loop is used to print out variables that are arrays
     // for (uint8_t i = 0; i < LINE_COUNT; i++) {
@@ -182,10 +180,10 @@ void loop() {
     // }
 
     // Print any non-array variables here
-    Serial.print("Back sensor: ");
-    Serial.print(rangeBack);
-    Serial.println("\t Front sensor");
-    Serial.println(rangeFront);
+    // Serial.print("Back sensor: ");
+    // Serial.print(rangeBack);
+    // Serial.print("\t Front sensor: ");
+    // Serial.println(rangeFront);
     print_time = t;
   }
 
@@ -331,21 +329,34 @@ void loop() {
     }
     break;
   case lineFollowing:
+    distToWall = min(getRangeDistance(rangeBack, BACK),
+                     getRangeDistance(rangeFront, FRONT));
+    if (distToWall <= minDist) {
+      shouldStop = true;
+    }
     if (shouldStop) {
       stopDriveMotors();
       nextState = waitingForData;
       fullJacobian = motorJacobian; // reset center of rotation
     } else {
-      followLine(0.5, 0.2, 0.1, 0);
+      x_dot = map((float)min(distToWall, minDist + stopDist), minDist,
+                  minDist + stopDist, 0.2, 2.1);
+      break;
     }
+#ifdef DEBUG
+    if (state != nextState) {
+      shouldPrint = true;
+    } else {
+      shouldPrint = false;
+    }
+#endif
+    state = nextState;
+  case coasting:
+    if (shouldStop) {
+      stopDriveMotors();
+      nextState = waitingForData;
+    }
+    coastMotors();
     break;
   }
-#ifdef DEBUG
-  if (state != nextState) {
-    shouldPrint = true;
-  } else {
-    shouldPrint = false;
-  }
-#endif
-  state = nextState;
 }

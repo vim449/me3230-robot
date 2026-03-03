@@ -10,6 +10,9 @@
 #define BACK false
 #define FRONT true
 
+#define minDist 4.0
+#define stopDist 3.0
+
 // ALL PINS
 // motor pins
 const uint8_t encoderPins[6] = {20, 21, 18, 19, 2, 3};

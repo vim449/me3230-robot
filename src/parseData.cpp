@@ -1,5 +1,7 @@
 #include "parseData.h"
 #include "extern.h"
+#include "followLine.h"
+#include "sending.h"
 #include "services.h"
 
 void parseData(void) {
@@ -64,6 +66,10 @@ void parseData(void) {
         startConveyorService(true);
       } else if (nextState == lineFollowing) {
         startLineFollowing();
+      } else if (nextState == coasting) {
+        x_dot = 0;
+        y_dot = 0;
+        theta_dot = 0;
       }
     }
   }
