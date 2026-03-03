@@ -9031,7 +9031,7 @@
 		)
 		(uuid "fe266aea-7872-439f-b91d-11a3bfdce00e")
 	)
-	(label "D45"
+	(label "D12"
 		(at 236.22 41.91 0)
 		(effects
 			(font
@@ -9051,7 +9051,7 @@
 		)
 		(uuid "01157a88-8455-4650-83de-d481ba272f6c")
 	)
-	(label "D11"
+	(label "D44"
 		(at 101.6 148.59 0)
 		(effects
 			(font
@@ -9531,7 +9531,7 @@
 		)
 		(uuid "72658034-0600-4c51-9422-9ca31b40e0ae")
 	)
-	(label "D12"
+	(label "D45"
 		(at 86.36 194.31 0)
 		(effects
 			(font
@@ -10001,7 +10001,7 @@
 		)
 		(uuid "b2362d1f-fa00-42f1-b3ef-c00603837e6f")
 	)
-	(label "D44"
+	(label "D11"
 		(at 236.22 39.37 0)
 		(effects
 			(font
