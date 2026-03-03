@@ -15,7 +15,7 @@ void menu() {
   // valid options are: Drive, Press Button, discard, dispense
   Serial.println("Please select a command to send to the mega");
   Serial.println("Options are Drive: 'a', Press Button 'b', discard 'c', "
-                 "dispense 'd', move rack 'e', line follow 'l'");
+                 "dispense 'd', move rack 'e', line follow 'l', coast 'C'");
 }
 
 void menu(State submenu) {
@@ -38,6 +38,9 @@ void menu(State submenu) {
     break;
   case lineFollowing:
     Serial.println("Now line following");
+    break;
+  case coasting:
+    Serial.println("Now Coasting");
     break;
   }
 }
@@ -100,6 +103,11 @@ void loop() {
             needParam = false;
             readyToSend = true;
             break;
+          case 'C':
+            menu(coasting);
+            state = coasting;
+            needParam = false;
+            readyToSend = true;
           default:
             break;
           }
