@@ -17,3 +17,7 @@ void coastMotors();
 ColorSensing getColorData();
 float rampSpeed(float x);
 float map(float x, float in_min, float in_max, float out_min, float out_max);
+void senseColorService();
+
+uint8_t getBlockHits(BlockType block);
+uint8_t getSilverfishHits();

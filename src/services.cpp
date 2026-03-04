@@ -1,5 +1,7 @@
 #include "services.h"
 #include "extern.h"
+#include "globals.h"
+#include "sending.h"
 // this file contains all services small enough to not warrant their own file
 
 void startConveyorService(bool forwards) {
@@ -135,15 +137,15 @@ inline float movingAverage(float arr[], uint8_t arr_size) {
 ColorSensing getColorData() {
   // returns a ColorSensing struct containing the pulseTime measurements of the
   // color sensor
+  Serial.println("Color Called");
+  digitalWrite(colorLED, HIGH); // turn on the LED temporarily
 
-  // TODO, talk to dr mascaro about delay() usage, see if switching to a timer
-  // check is needed
   const uint8_t numSamples = 8;
   float R[numSamples], G[numSamples], B[numSamples], C[numSamples];
   // get Red data
   digitalWrite(colorS2, LOW);
   digitalWrite(colorS3, LOW);
-  delay(10);
+  delay(30);
   for (int i = 0; i < numSamples; i++) {
     R[i] = readPulse();
   }
@@ -172,13 +174,73 @@ ColorSensing getColorData() {
     C[i] = readPulse();
   }
 
-  // TODO, convert to frequency
   ColorSensing data = {
       movingAverage(R, numSamples), movingAverage(G, numSamples),
       movingAverage(B, numSamples), movingAverage(C, numSamples)};
 
+  digitalWrite(colorLED, LOW);
   return data;
 };
+
+uint8_t getBlockHits(BlockType block) {
+  if (block == wood) {
+    return pick == wood ? 5 : pick == stone ? 4 : pick == iron ? 2 : 1;
+  } else if (block == stone) {
+    return pick == wood ? 10 : pick == stone ? 5 : pick == iron ? 3 : 2;
+  } else if (block == iron) {
+    return pick == wood ? 0 : pick == stone ? 10 : pick == iron ? 5 : 3;
+  } else {
+    return pick == wood ? 0 : pick == stone ? 0 : pick == iron ? 10 : 5;
+  }
+}
+
+uint8_t getSilverfishHits() {
+  return sword == wood ? 10 : sword == stone ? 7 : sword == iron ? 4 : 1;
+}
+
+void senseColorService() {
+  // Color sensor only used on middle mines, which give stone iron diamond only
+
+  ColorSensing data = getColorData(); // NOTE, will cause a 30ms delay
+  float red = 100 * data.Clear / data.Red;
+  float blue = 100 * data.Clear / data.Blue;
+  float green = 100 * data.Clear / data.Green;
+
+  BlockType block = stone;
+  if (red >= 50 && blue <= 30 && green <= 30) {
+    block = iron;
+  } else if (blue >= 50 && red <= 30 && green <= 30) {
+    block = diamond;
+  }
+  targetPress = getBlockHits(block);
+
+  if (targetPress > 0) {
+    timerTarget = t + PRESS_TIME;
+    buttonServo.write(PRESS_ANGLE);
+    servoTarget = true;
+    nextState = pressButton;
+    xbee.write((byte)block);
+#ifdef DEBUG
+    switch (block) {
+    case wood:
+      Serial.println("Wood");
+      break;
+    case stone:
+      Serial.println("Stone");
+      break;
+    case iron:
+      Serial.println("Iron");
+      break;
+    case diamond:
+      Serial.println("Diamond");
+      break;
+    }
+#endif
+  } else {
+    Serial.println("Can't mine block with current pickaxe");
+    nextState = waitingForData;
+  }
+}
 
 float map(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -196,7 +258,8 @@ float map(float x, float in_min, float in_max, float out_min, float out_max) {
 //   } else if (x <= c3) {
 //     return 2.1;
 //   } else {
-//     return 175.0 / 4608.0 * pow(x - c3, 3) - 35.0 / 128.0 * pow(x - c3, 2) +
+//     return 175.0 / 4608.0 * pow(x - c3, 3) - 35.0 / 128.0 * pow(x - c3, 2)
+//     +
 //            2.1;
 //   }
 // }

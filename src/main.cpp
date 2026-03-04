@@ -1,5 +1,3 @@
-// #define DEBUG
-
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "HardwareSerial.h"
@@ -67,7 +65,6 @@ const double rangeAlpha = 0.025;
 double distToWall = 0;
 
 // game variables
-enum BlockType { none, wood, stone, iron, diamond };
 BlockType stored[3] = {none, none, none};
 BlockType pick = {wood};
 BlockType sword = {wood};
@@ -102,9 +99,10 @@ void motorPinSetup() {
   conveyor->init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
-  buttonServo.write(PRESS_STORE_ANGLE);
+  // buttonServo.write(PRESS_STORE_ANGLE);
   discardServo.attach(discardServo_PWM);
-  discardServo.write(0);
+  discardServo.write(DISCARD_STORE_ANGLE);
+  buttonServo.write(PRESS_STORE_ANGLE);
 }
 
 void sensorPinSetup() {
@@ -132,7 +130,7 @@ void sensorPinSetup() {
   digitalWrite(colorS0, HIGH);
   digitalWrite(colorS1, LOW);
   // turn on color sensor LED
-  digitalWrite(colorLED, HIGH);
+  digitalWrite(colorLED, LOW);
 }
 
 void reset() {
@@ -250,7 +248,7 @@ void loop() {
 #ifdef DEBUG
         Serial.println("Extended");
 #endif
-        buttonServo.write(30);
+        buttonServo.write(PRESS_STORE_ANGLE);
         timerTarget = t + PRESS_TIME;
         servoTarget = false;
         numPressed++;
@@ -264,10 +262,12 @@ void loop() {
           // button has been pressed enough times
           numPressed = 0;
           targetPress = 0;
-          nextState = waitingForData;
+          // nextState = waitingForData;
+          nextState = waitingForBlock;
+          timerTarget = t + 5;
         } else {
           // button needs to be pressed again
-          buttonServo.write(60);
+          buttonServo.write(PRESS_ANGLE);
           servoTarget = true;
           timerTarget = t + PRESS_TIME;
           nextState = pressButton;
@@ -276,8 +276,33 @@ void loop() {
     }
     break;
   case waitingForBlock:
-    // TODO
-    // NOT NEEDED FOR PM6
+#ifdef DEBUG
+    if (shouldPrint)
+      Serial.println("Entered state waitngForBlock");
+#endif
+    if (shouldStop) {
+      nextState = waitingForData;
+    }
+
+    if (t >= timerTarget) {
+      // if hall effect high, press again
+      if (analogRead(hallEffectPin) < 200) {
+        targetPress = getSilverfishHits();
+        // press button again
+        buttonServo.write(PRESS_ANGLE);
+        servoTarget = true;
+        timerTarget = t + PRESS_TIME;
+        nextState = pressButton;
+      } else {
+        // not a silver fish, good to go back
+        // x_dot = -2.0;
+        // y_dot = 0;
+        // theta_dot = 0;
+        // nextState = driving;
+        nextState = waitingForData;
+      }
+    }
+    // iff hall effect low, drive back
     break;
   case movingRack:
 #ifdef DEBUG
@@ -318,7 +343,7 @@ void loop() {
     if (t >= timerTarget) {
       if (servoTarget) {
         // servo finished extending, bring it back
-        discardServo.write(30);
+        discardServo.write(DISCARD_STORE_ANGLE);
         timerTarget = t + 1;
         servoTarget = false;
         nextState = discarding;
@@ -329,6 +354,10 @@ void loop() {
     }
     break;
   case lineFollowing:
+#ifdef DEBUG
+    if (shouldPrint)
+      Serial.println("Entered state line following");
+#endif
     distToWall = min(getRangeDistance(rangeBack, BACK),
                      getRangeDistance(rangeFront, FRONT));
     if (distToWall <= minDist) {
@@ -336,21 +365,18 @@ void loop() {
     }
     if (shouldStop) {
       stopDriveMotors();
-      nextState = waitingForData;
+      if (getRangeDistance(rangeFront, FRONT) <= minDist + stopDist) {
+        senseColorService();
+      } else {
+        nextState = waitingForData;
+      }
       fullJacobian = motorJacobian; // reset center of rotation
     } else {
       x_dot = map((float)min(distToWall, minDist + stopDist), minDist,
                   minDist + stopDist, 0.2, 2.1);
-      break;
+      followLine(x_dot);
     }
-#ifdef DEBUG
-    if (state != nextState) {
-      shouldPrint = true;
-    } else {
-      shouldPrint = false;
-    }
-#endif
-    state = nextState;
+    break;
   case coasting:
     if (shouldStop) {
       stopDriveMotors();
@@ -359,4 +385,13 @@ void loop() {
     coastMotors();
     break;
   }
+
+#ifdef DEBUG
+  if (state != nextState) {
+    shouldPrint = true;
+  } else {
+    shouldPrint = false;
+  }
+#endif
+  state = nextState;
 }

@@ -1,17 +1,19 @@
 #pragma once
 #include <Arduino.h>
 
-#define DISCARD_ANGLE 90
-#define DISCARD_STORE_ANGLE 30
+#define DISCARD_ANGLE 180
+#define DISCARD_STORE_ANGLE 90
 #define PRESS_ANGLE 60
 #define PRESS_STORE_ANGLE 30
-#define PRESS_TIME 0.25
+#define PRESS_TIME 120
 #define xbee Serial3
 #define BACK false
 #define FRONT true
 
 #define minDist 4.0
 #define stopDist 3.0
+
+#define DEBUG
 
 // ALL PINS
 // motor pins
@@ -20,9 +22,9 @@ const uint8_t motorCurrentPins[3] = {A5, A4, A3};
 const uint8_t M1_PWM = 5, M1_C = 42, M1_D = 43;
 const uint8_t M2_PWM = 7, M2_C = 40, M2_D = 41;
 const uint8_t M3_PWM = 6, M3_C = 38, M3_D = 39;
-const uint8_t rack_PWM = 46, rack_C = 47, rack_D = 48;
-const uint8_t conveyor_PWM = 45, conveyor_C = 49, conveyor_D = 50;
-const uint8_t buttonServo_PWM = 11, discardServo_PWM = 12;
+const uint8_t rack_PWM = 45, rack_C = 47, rack_D = 48;
+const uint8_t conveyor_PWM = 46, conveyor_C = 49, conveyor_D = 50;
+const uint8_t buttonServo_PWM = 13, discardServo_PWM = 12;
 
 // misc sensor pins
 const uint8_t hallEffectPin = A6;
@@ -51,3 +53,5 @@ struct ColorSensing {
   float Blue;
   float Clear;
 };
+
+enum BlockType { none, wood, stone, iron, diamond };

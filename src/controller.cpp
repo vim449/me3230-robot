@@ -1,7 +1,5 @@
 // TODO, generalize SISO control to decentralized MIMO control with scalar gains
 #include <Arduino.h>
-// L298N::L298N(unsigned char ENpin, unsigned char Cpin, unsigned char Dpin)
-//: _PWM(ENpin), _Cpin(Cpin), _Dpin(Dpin), _flip(false) {}
 
 class SISOPIDControl {
 public:

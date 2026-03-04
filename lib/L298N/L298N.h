@@ -29,8 +29,12 @@ private:
   unsigned char _Cpin;
   unsigned char _Dpin;
   // timer pins
+  static const unsigned char TIMER0_PIN1 = 13;
+  static const unsigned char TIMER0_PIN2 = 4;
   static const unsigned char TIMER1_PIN1 = 11;
   static const unsigned char TIMER1_PIN2 = 12;
+  static const unsigned char TIMER2_PIN1 = 10;
+  static const unsigned char TIMER2_PIN2 = 9;
   static const unsigned char TIMER3_PIN1 = 5;
   static const unsigned char TIMER3_PIN2 = 2;
   static const unsigned char TIMER4_PIN1 = 6;

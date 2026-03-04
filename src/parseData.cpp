@@ -1,6 +1,7 @@
 #include "parseData.h"
 #include "extern.h"
 #include "followLine.h"
+#include "globals.h"
 #include "sending.h"
 #include "services.h"
 
@@ -56,7 +57,7 @@ void parseData(void) {
         buttonServo.write(PRESS_ANGLE);
         servoTarget = true;
       } else if (nextState == discarding) {
-        discardServo.write(90);
+        discardServo.write(DISCARD_ANGLE);
         // buttonServo.write(buttonServo.read());
         timerTarget = t + 2;
         servoTarget = true;
@@ -70,6 +71,8 @@ void parseData(void) {
         x_dot = 0;
         y_dot = 0;
         theta_dot = 0;
+      } else if (nextState == waitingForBlock) {
+        senseColorService();
       }
     }
   }

@@ -62,12 +62,11 @@ void L298N::setSpeed(int speed) {
   }
 
 #ifdef TIMERS_AVAILABLE
-  // OCR5 is intentionally flipped
   volatile uint16_t *OCRA[] = {
-      &OCR1A, nullptr, &OCR3A, &OCR4A, &OCR5B,
+      &OCR1A, nullptr, &OCR3A, &OCR4A, &OCR5A,
   };
   volatile uint16_t *OCRB[] = {
-      &OCR1B, nullptr, &OCR3B, &OCR4B, &OCR5A,
+      &OCR1B, nullptr, &OCR3B, &OCR4B, &OCR5B,
   };
   if (_timer) {
     if (_isOutput1)
@@ -93,12 +92,11 @@ void L298N::setBrake(int brake) {
   brake = brake > 0 ? brake : -brake;
   brake = brake > 400 ? 400 : brake;
 #ifdef TIMERS_AVAILABLE
-  // OCR5 is intentionally flipped
   volatile uint16_t *OCRA[] = {
-      &OCR1A, nullptr, &OCR3A, &OCR4A, &OCR5B,
+      &OCR1A, nullptr, &OCR3A, &OCR4A, &OCR5A,
   };
   volatile uint16_t *OCRB[] = {
-      &OCR1B, nullptr, &OCR3B, &OCR4B, &OCR5A,
+      &OCR1B, nullptr, &OCR3B, &OCR4B, &OCR5B,
   };
   if (_timer) {
     if (_isOutput1)

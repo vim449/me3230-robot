@@ -5,7 +5,7 @@
 #include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "L298N.h"
-#include "PWMServo.h"
+#include "PWMServo2.h"
 #include "QTRSensors.h"
 #include "globals.h"
 #include "sending.h"
@@ -45,3 +45,10 @@ extern uint8_t targetRack, currentRack;
 extern uint8_t targetPress;
 extern bool servoTarget;
 extern double line_err, total_line_err;
+
+// game variables
+extern BlockType stored[3];
+extern BlockType pick;
+extern BlockType sword;
+extern bool shield;
+extern bool needsDiscard;

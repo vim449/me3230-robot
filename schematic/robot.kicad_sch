@@ -8465,6 +8465,16 @@
 		)
 		(uuid "1340916a-e4fe-4c35-afa4-0d1c1525d239")
 	)
+	(text "Yellow"
+		(exclude_from_sim no)
+		(at 89.154 130.81 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "2e5bc486-d2fb-483b-b012-ac9ed2499a80")
+	)
 	(text "Everything In Here Is Rigidly Attached to the Base"
 		(exclude_from_sim no)
 		(at 46.482 22.86 0)
@@ -8475,6 +8485,26 @@
 		)
 		(uuid "3069b8c8-1724-45b3-a186-07f1f9ed037b")
 	)
+	(text "Black\nWhite\nGrey\nPurple"
+		(exclude_from_sim no)
+		(at 141.478 126.492 0)
+		(effects
+			(font
+				(size 1.397 1.397)
+			)
+		)
+		(uuid "4afaa18a-1e34-4739-a538-0dc149572b7c")
+	)
+	(text "Green"
+		(exclude_from_sim no)
+		(at 90.17 123.19 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "4d49e035-0ff2-4237-a7dd-bdaa2b8fe5b8")
+	)
 	(text "Conveyor Motor"
 		(exclude_from_sim no)
 		(at 294.64 59.69 0)
@@ -8484,6 +8514,16 @@
 			)
 		)
 		(uuid "5c62844f-58c0-41b6-83b7-ff98bbb9bd4d")
+	)
+	(text "Orange"
+		(exclude_from_sim no)
+		(at 90.17 133.35 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "6ebf2c43-1974-4cad-8621-a93f6d337bf1")
 	)
 	(text "In Shovel"
 		(exclude_from_sim no)
@@ -8594,6 +8634,16 @@
 			)
 		)
 		(uuid "e30f9b59-82c3-4ad1-83a9-18886d5fe17f")
+	)
+	(text "Blue"
+		(exclude_from_sim no)
+		(at 140.97 133.35 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f05145de-ab1a-4b1a-b565-6320c6ca13a7")
 	)
 	(text "Rack Motor\n"
 		(exclude_from_sim no)

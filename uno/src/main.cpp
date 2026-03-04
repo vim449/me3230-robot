@@ -9,13 +9,16 @@ bool inState = false;
 State state;
 uint8_t param = 0;
 
+enum BlockType { none, wood, stone, iron, diamond };
+
 void menu() {
   // menu printer
 
   // valid options are: Drive, Press Button, discard, dispense
   Serial.println("Please select a command to send to the mega");
   Serial.println("Options are Drive: 'a', Press Button 'b', discard 'c', "
-                 "dispense 'd', move rack 'e', line follow 'l', coast 'C'");
+                 "dispense 'd', move rack 'e', line follow 'l', coast 'C', "
+                 "sense color 's'");
 }
 
 void menu(State submenu) {
@@ -42,6 +45,9 @@ void menu(State submenu) {
   case coasting:
     Serial.println("Now Coasting");
     break;
+  case waitingForBlock:
+    Serial.println("Sensing block color");
+    break;
   }
 }
 
@@ -53,6 +59,26 @@ void setup() {
 
 void loop() {
   if (inState) {
+    if (xbee.available() > 0) {
+      switch ((BlockType)xbee.read()) {
+      case wood:
+        Serial.println("Wood");
+        break;
+      case stone:
+        Serial.println("Stone");
+        break;
+      case iron:
+        Serial.println("Iron");
+        break;
+      case diamond:
+        Serial.println("Diamond");
+        break;
+      case none:
+        Serial.println("No Block");
+        break;
+      }
+      // Serial.println(xbee.read());
+    }
     if (Serial.available() > 0) {
       int arg = Serial.read();
       if (arg == '1') {
@@ -108,6 +134,13 @@ void loop() {
             state = coasting;
             needParam = false;
             readyToSend = true;
+            break;
+          case 's':
+            menu(waitingForBlock);
+            state = waitingForBlock;
+            needParam = false;
+            readyToSend = true;
+            break;
           default:
             break;
           }
