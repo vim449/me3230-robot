@@ -2,10 +2,9 @@
 // to the global variables defined in main.cpp
 #pragma once
 
-#include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "L298N.h"
-#include "PWMServo2.h"
+#include "PWMServo.h"
 #include "QTRSensors.h"
 #include "globals.h"
 #include "sending.h"
@@ -13,7 +12,7 @@
 // turn off when not connected to pc for performance
 // #define DEBUG
 #ifdef DEBUG
-bool shouldPrint = true;
+extern bool shouldPrint;
 #endif
 
 // PINS, not sure this is needed tbh
@@ -23,7 +22,6 @@ extern L298N *drive_motors[3];
 extern L298N *conveyor;
 extern L298N *rack;
 extern PWMServo buttonServo, discardServo;
-extern const BLA::Matrix<3, 3, float> motorJacobian;
 extern BLA::Matrix<3, 3> fullJacobian;
 
 // sensors

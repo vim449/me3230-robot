@@ -2,7 +2,6 @@
 // transmission state handling is stored here
 #pragma once
 
-#include <Arduino.h>
 #define START_MESSAGE 255
 #define SOFTWARE_STOP 200
 #define SOFTWARE_START 100

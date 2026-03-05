@@ -1,4 +1,3 @@
-#include "BasicLinearAlgebra.h"
 #include "Encoder.h"
 #include "HardwareSerial.h"
 #include "L298N.h"
@@ -21,15 +20,6 @@ L298N *conveyor;
 L298N *rack;
 PWMServo buttonServo, discardServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
-const BLA::Matrix<3, 3, float> motorJacobian = {0,
-                                                1000.0 / 4.80,
-                                                1586.88 / 4.80,
-                                                sqrt(3) / 0.0096,
-                                                -500.0 / 4.80,
-                                                1586.88 / 4.80,
-                                                sqrt(3) / 0.0096,
-                                                500.0 / 4.80,
-                                                -1586.88 / 4.80};
 BLA::Matrix<3, 3> fullJacobian = motorJacobian;
 
 // sensors
@@ -45,6 +35,7 @@ double hallEffect = 0.0;
 
 // time variables
 double t, t0, print_time;
+bool shouldPrint;
 
 // control variables
 State state, nextState;

@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <BasicLinearAlgebra.h>
 
 #define DISCARD_ANGLE 180
 #define DISCARD_STORE_ANGLE 90
@@ -33,7 +34,8 @@ const uint8_t rangeFrontPin = A1;
 const uint8_t limitPins[2] = {51, 52};
 
 // reflectance sensors
-const uint8_t lineQtrPins[8] = {23, 25, 27, 29, 31, 33, 35, 37};
+#define LINE_COUNT 8
+const uint8_t lineQtrPins[LINE_COUNT] = {23, 25, 27, 29, 31, 33, 35, 37};
 const uint8_t shovelQtrPins[1] = {34};
 const uint8_t conveyorQtrPins[1] = {36};
 
@@ -46,6 +48,16 @@ const long USB_BAUD = 57600;
 
 const double LINE_KP = 0.375;
 const double LINE_FEED = 0.9;
+
+const BLA::Matrix<3, 3, float> motorJacobian = {0,
+                                                1000.0 / 4.80,
+                                                1586.88 / 4.80,
+                                                sqrt(3) / 0.0096,
+                                                -500.0 / 4.80,
+                                                1586.88 / 4.80,
+                                                sqrt(3) / 0.0096,
+                                                500.0 / 4.80,
+                                                -1586.88 / 4.80};
 
 struct ColorSensing {
   float Red;

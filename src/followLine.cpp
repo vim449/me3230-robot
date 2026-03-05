@@ -1,6 +1,5 @@
 #include "followLine.h"
 #include "extern.h"
-#include "globals.h"
 #include "services.h"
 
 // distance in milimeters

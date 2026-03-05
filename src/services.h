@@ -1,5 +1,5 @@
 #pragma once
-#include "extern.h"
+#include "globals.h"
 
 void startConveyorService(bool forward);
 void moveRackService(uint8_t target);

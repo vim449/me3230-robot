@@ -1,7 +1,5 @@
 #include "services.h"
 #include "extern.h"
-#include "globals.h"
-#include "sending.h"
 // this file contains all services small enough to not warrant their own file
 
 void startConveyorService(bool forwards) {
