@@ -76,6 +76,9 @@ void loop() {
       case none:
         Serial.println("No Block");
         break;
+      default:
+        Serial.println("Silverfish");
+        break;
       }
       // Serial.println(xbee.read());
     }
