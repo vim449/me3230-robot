@@ -10,19 +10,16 @@
 #include "sending.h"
 
 // turn off when not connected to pc for performance
-// #define DEBUG
 #ifdef DEBUG
 extern bool shouldPrint;
 #endif
 
-// PINS, not sure this is needed tbh
-
 // motors
-extern L298N *drive_motors[3];
+extern L298N *drive_motors[NUM_MOTORS];
 extern L298N *conveyor;
 extern L298N *rack;
 extern PWMServo buttonServo, discardServo;
-extern BLA::Matrix<3, 3> fullJacobian;
+extern BLA::Matrix<NUM_MOTORS, NUM_MOTORS> fullJacobian;
 
 // sensors
 extern QTRSensors lineQtr;
