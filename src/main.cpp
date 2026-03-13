@@ -1,66 +1,19 @@
-#include "Encoder.h"
-#include "HardwareSerial.h"
-#include "L298N.h"
-#include "PWMServo.h"
-#include "QTRSensors.h"
+// extern dependencies
+#include <Arduino.h>
+#include <Encoder.h>
+#include <HardwareSerial.h>
+#include <L298N.h>
+#include <PWMServo.h>
+#include <QTRSensors.h>
+
+// internal files
 #include "followLine.h"
 #include "globals.h"
 #include "parseData.h"
 #include "sending.h"
 #include "services.h"
-#include <Arduino.h>
 
-double line_err = 0;
-double total_line_err = 0;
-
-// motors
-bool motors_exist = false; // to ensure motor objects are only created once
-L298N *drive_motors[3];
-L298N *conveyor;
-L298N *rack;
-PWMServo buttonServo, discardServo;
-// maps from x' y' theta' space to motor space, can be found from getJacobian.m
-BLA::Matrix<3, 3> fullJacobian = motorJacobian;
-
-// sensors
-QTRSensors lineQtr;
-QTRSensors shovelQtr;
-QTRSensors conveyorQtr;
-uint16_t lineValues[LINE_COUNT];
-uint16_t lineValuesFiltered[LINE_COUNT];
-bool limitStates[2] = {
-    true, true}; // switches are high by default and low when triggered
-Encoder *encoders[3];
-double hallEffect = 0.0;
-
-// time variables
-double t, t0, print_time;
-bool shouldPrint;
-
-// control variables
-State state, nextState;
-float x_dot, y_dot, theta_dot;
-uint8_t targetRack = 0;
-uint8_t currentRack = 0; // index of limit switch the rack is resting at
-double timerTarget = 0;
-
-bool servoTarget = false; // true if the servo should be extended
-uint8_t targetPress = 0;
-uint8_t numPressed = 0; // number of times button pressed
-
-int16_t encoderCounts[3] = {0, 0, 0};
-
-double rangeBack = 0;
-double rangeFront = 0;
-const double rangeAlpha = 0.025;
-double distToWall = 0;
-
-// game variables
-BlockType stored[3] = {none, none, none};
-BlockType pick = {wood};
-BlockType sword = {wood};
-bool shield = false;
-bool needsDiscard = false;
+#include "init.h"
 
 void serialSetup() {
   Serial.begin(USB_BAUD);
@@ -72,18 +25,18 @@ void motorPinSetup() {
   if (!motors_exist) {
     Serial.println("Created Motors!");
     drive_motors[0] = new L298N(M1_PWM, M1_C, M1_D);
-    // encoders[0] = new Encoder(encoderPins[0], encoderPins[1]);
+    encoders[0] = new Encoder(encoderPins[0], encoderPins[1]);
     drive_motors[1] = new L298N(M2_PWM, M2_C, M2_D);
-    // encoders[1] = new Encoder(encoderPins[2], encoderPins[3]);
+    encoders[1] = new Encoder(encoderPins[2], encoderPins[3]);
     drive_motors[2] = new L298N(M3_PWM, M3_C, M3_D);
-    // encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
+    encoders[2] = new Encoder(encoderPins[4], encoderPins[5]);
     conveyor = new L298N(conveyor_PWM, conveyor_C, conveyor_D);
     rack = new L298N(rack_PWM, rack_C, rack_D);
     motors_exist = true;
   }
 
-  bool flipTable[3] = {false, false, true};
-  for (int i = 0; i < 3; i++) {
+  bool flipTable[NUM_MOTORS] = {false, false, true};
+  for (int i = 0; i < NUM_MOTORS; i++) {
     drive_motors[i]->init();
     drive_motors[i]->flip(flipTable[i]);
   }

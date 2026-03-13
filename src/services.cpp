@@ -23,8 +23,9 @@ void moveRackService(uint8_t target) {
   }
 }
 
-BLA::Matrix<3, 3, float> mapCenterOfRotation(float x, float y) {
-  BLA::Matrix<3, 3> J;
+BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> mapCenterOfRotation(float x,
+                                                               float y) {
+  BLA::Matrix<NUM_MOTORS, NUM_MOTORS> J;
   J(0, 0) = 1;
   J(0, 1) = 0;
   J(0, 2) = -y;
@@ -45,20 +46,20 @@ void mapCenterOfRotation(float x, float y, bool overload) {
 
 void controlMotors() {
   // note, this does not use the mapped center of rotation, maybe i should, idk
-  BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
-  BLA::Matrix<3, 1, float> motorSpeeds = motorJacobian * in;
+  BLA::Matrix<NUM_MOTORS, 1, float> in = {x_dot, y_dot, theta_dot};
+  BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds = motorJacobian * in;
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     drive_motors[i]->setSpeed(motorSpeeds(i));
   }
 }
 
 void controlMotors(float x, float y) {
-  BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
-  BLA::Matrix<3, 1, float> motorSpeeds =
+  BLA::Matrix<NUM_MOTORS, 1, float> in = {x_dot, y_dot, theta_dot};
+  BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds =
       motorJacobian * mapCenterOfRotation(x, y) * in;
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     drive_motors[i]->setSpeed(motorSpeeds(i));
   }
 }
@@ -66,14 +67,14 @@ void controlMotors(float x, float y) {
 void controlMotorsClamped(float x, float y) {
   // Sets a center of rotation at x,y from primary coords, then scales all
   // coordinates down by the amount that the fastest motor is saturated
-  BLA::Matrix<3, 1, float> in = {x_dot, y_dot, theta_dot};
-  BLA::Matrix<3, 1, float> motorSpeeds =
+  BLA::Matrix<NUM_MOTORS, 1, float> in = {x_dot, y_dot, theta_dot};
+  BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds =
       motorJacobian * mapCenterOfRotation(x, y) * in;
   double max = 400.0;
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     max = abs(motorSpeeds(i)) > max ? motorSpeeds(i) : max;
   }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     drive_motors[i]->setSpeed(motorSpeeds(i) / max * 400.0);
   }
 }
@@ -81,13 +82,13 @@ void controlMotorsClamped(float x, float y) {
 void controlMotorsClamped() {
   // Assumes that full rotation jacobian has been pre-cached and just scaless
   // motor coordinates down by the fastest motor's saturation
-  BLA::Matrix<3, 1> in = {x_dot, y_dot, theta_dot};
-  BLA::Matrix<3, 1> motorSpeeds = fullJacobian * in;
+  BLA::Matrix<NUM_MOTORS, 1> in = {x_dot, y_dot, theta_dot};
+  BLA::Matrix<NUM_MOTORS, 1> motorSpeeds = fullJacobian * in;
   double max = 400.0;
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     max = abs(motorSpeeds(i)) > max ? motorSpeeds(i) : max;
   }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
     drive_motors[i]->setSpeed(motorSpeeds(i) / max * 400.0);
   }
 }
@@ -186,9 +187,9 @@ uint8_t getBlockHits(BlockType block) {
   } else if (block == stone) {
     return pick == wood ? 10 : pick == stone ? 5 : pick == iron ? 3 : 2;
   } else if (block == iron) {
-    return pick == wood ? 0 : pick == stone ? 10 : pick == iron ? 5 : 3;
+    return pick == wood ? -10 : pick == stone ? 10 : pick == iron ? 5 : 3;
   } else {
-    return pick == wood ? 0 : pick == stone ? 0 : pick == iron ? 10 : 5;
+    return pick == wood ? -10 : pick == stone ? -10 : pick == iron ? 10 : 5;
   }
 }
 
@@ -212,6 +213,10 @@ void senseColorService() {
   }
   targetPress = getBlockHits(block);
 
+  // TODO add condition to mine unminable block anyways
+  if (false) {
+    targetPress *= -1;
+  }
   if (targetPress > 0) {
     timerTarget = t + PRESS_TIME;
     buttonServo.write(PRESS_ANGLE);
@@ -237,27 +242,12 @@ void senseColorService() {
   } else {
     Serial.println("Can't mine block with current pickaxe");
     nextState = waitingForData;
+    targetPress = 0;
   }
 }
 
 float map(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-// this doesn't work, will drive pretty exactly 30 cm forward
-// float rampSpeed(float x) {
-// #define c1 4
-// #define c2 10
-// #define c3 25.2
 
-//   if (x <= c1 || x > 30) {
-//     return 0;
-//   } else if (x <= c2) {
-//     return 0.175 * pow(x - c1, 2) - 7.0 / 360.0 * pow(x - c1, 3);
-//   } else if (x <= c3) {
-//     return 2.1;
-//   } else {
-//     return 175.0 / 4608.0 * pow(x - c3, 3) - 35.0 / 128.0 * pow(x - c3, 2)
-//     +
-//            2.1;
-//   }
-// }
+void NOP() {};

@@ -3,7 +3,8 @@
 
 void startConveyorService(bool forward);
 void moveRackService(uint8_t target);
-BLA::Matrix<3, 3, float> mapCenterOfRotation(float x, float y);
+BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> mapCenterOfRotation(float x,
+                                                               float y);
 void mapCenterOfRotation(float x, float y, bool overload);
 inline double toSeconds(double microseconds) { return microseconds / 1000000.; }
 // void controlMotors(double x_dot, double y_dot, double theta_dot);
