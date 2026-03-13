@@ -22,3 +22,4 @@ void senseColorService();
 
 uint8_t getBlockHits(BlockType block);
 uint8_t getSilverfishHits();
+void NOP();
