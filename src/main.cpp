@@ -151,8 +151,11 @@ void setup() {
   reset();
 }
 
+float print_time = 0;
 void loop() {
+  t_old = t;
   t = micros() / 1000000. - t0;
+  dt = t * 1000. - t_old * 1000.; // dt in millis not micros
 
   //  PRINT STATEMENTS
   //  non-blocking way to delay printing

@@ -6,7 +6,6 @@
 const double lineArrayDist[LINE_COUNT] = {0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6};
 const uint16_t LINE_BIAS[LINE_COUNT] = {146, 96, 96, 96, 96, 96, 96, 122};
 const double TARGET_LINE = 2.8;
-double last_time = 0;
 
 void startLineFollowing() {
   total_line_err = 0; // reset PID integral windup
@@ -48,8 +47,8 @@ void followLine(double feed_rate) {
   float last_err = line_err;
   line_err = linePos - TARGET_LINE;
   // want to sample total err and derivative error in millis, not seconds
-  float d_err = (line_err - last_err) / (t * 1000. - last_time * 1000.);
-  total_line_err += line_err / (t * 1000. - last_time * 1000.);
+  float d_err = (line_err - last_err) / dt;
+  total_line_err += line_err * dt;
 
   y_dot = 0;
   // x_dot = constrain(feed_rate - 0.015 * pow(abs(line_err), 1.2),
@@ -57,5 +56,4 @@ void followLine(double feed_rate) {
   x_dot = feed_rate;
   theta_dot = -(line_err * Kp + d_err * Kd + total_line_err * Ki);
   controlMotorsClamped();
-  last_time = t;
 }

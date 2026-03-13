@@ -31,12 +31,16 @@ extern uint16_t lineValues[LINE_COUNT];
 extern uint16_t lineValuesFiltered[LINE_COUNT];
 extern QTRSensors shovelQtr;
 extern QTRSensors conveyorQtr;
-extern Encoder *encoders[3];
+
+extern Encoder *encoders[NUM_MOTORS];
+extern int16_t encoderCounts[NUM_MOTORS];
+extern float theta[NUM_MOTORS];
+extern float thetaOld[NUM_MOTORS];
 
 extern double rangeFront, rangeBack;
 
 // control targets
-extern double t, t0, timerTarget;
+extern double t, t0, timerTarget, dt;
 extern State state, nextState;
 extern float x_dot, y_dot, theta_dot;
 extern uint8_t targetRack, currentRack;
