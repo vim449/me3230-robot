@@ -1,5 +1,5 @@
 #include "drive.h"
-#include "globals.h"
+#include "extern.h"
 #include "services.h"
 
 const int MAX_SEGMENTS = 4;
