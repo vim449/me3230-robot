@@ -19,7 +19,8 @@
 // ALL PINS
 // motor pins
 #define NUM_MOTORS 3
-const uint8_t encoderPins[6] = {20, 21, 18, 19, 2, 3};
+// const uint8_t encoderPins[6] = {20, 21, 19, 18, 3, 2};
+const uint8_t encoderPins[6] = {20, 21, 3, 2, 19, 18};
 const uint8_t motorCurrentPins[NUM_MOTORS] = {A5, A4, A3};
 const uint8_t M1_PWM = 5, M1_C = 42, M1_D = 43;
 const uint8_t M2_PWM = 7, M2_C = 40, M2_D = 41;
@@ -50,16 +51,11 @@ const long USB_BAUD = 57600;
 const double LINE_KP = 0.375;
 const double LINE_FEED = 0.9;
 
+const double rw = 47.4 / 1000.0 / 2.0;
 const BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> motorJacobian = {
-    0,
-    1000.0 / 4.80,
-    1586.88 / 4.80,
-    sqrt(3) / 0.0096,
-    -500.0 / 4.80,
-    1586.88 / 4.80,
-    sqrt(3) / 0.0096,
-    500.0 / 4.80,
-    -1586.88 / 4.80};
+    0,           1 / rw,      0.1417 / rw,        sqrt(3) / (2 * rw),
+    -0.5 / rw,   0.1565 / rw, sqrt(3) / (2 * rw), 0.5 / rw,
+    -0.1565 / rw};
 
 struct ColorSensing {
   float Red;

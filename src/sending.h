@@ -17,4 +17,5 @@ enum State {
   waitingForData,
   lineFollowing,
   coasting,
+  trajectory,
 };

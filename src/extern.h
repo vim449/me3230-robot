@@ -30,14 +30,14 @@ extern QTRSensors shovelQtr;
 extern QTRSensors conveyorQtr;
 
 extern Encoder *encoders[NUM_MOTORS];
-extern int16_t encoderCounts[NUM_MOTORS];
+extern int32_t encoderCounts[NUM_MOTORS];
 extern float theta[NUM_MOTORS];
 extern float thetaOld[NUM_MOTORS];
 
 extern double rangeFront, rangeBack;
 
 // control targets
-extern double t, t0, timerTarget, dt;
+extern double t, t0, t_old, timerTarget, dt;
 extern State state, nextState;
 extern float x_dot, y_dot, theta_dot;
 extern uint8_t targetRack, currentRack;

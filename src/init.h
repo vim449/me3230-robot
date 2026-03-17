@@ -50,9 +50,10 @@ bool servoTarget = false; // true if the servo should be extended
 uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
 
-int16_t encoderCounts[NUM_MOTORS] = {0};
+int32_t encoderCounts[NUM_MOTORS] = {0};
 float theta[NUM_MOTORS] = {0};
 float thetaOld[NUM_MOTORS] = {0};
+float omega[NUM_MOTORS] = {0};
 
 double rangeBack = 0;
 double rangeFront = 0;

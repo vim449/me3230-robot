@@ -31,7 +31,7 @@ BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> mapCenterOfRotation(float x,
   J(0, 2) = -y;
   J(1, 0) = 0;
   J(1, 1) = 1;
-  J(1, 2) = x;
+  J(1, 2) = -x;
   J(2, 0) = 0;
   J(2, 1) = 0;
   J(2, 2) = 1;

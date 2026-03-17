@@ -7,6 +7,7 @@
 #include <QTRSensors.h>
 
 // internal files
+#include "drive.h"
 #include "followLine.h"
 #include "globals.h"
 #include "parseData.h"
@@ -43,7 +44,6 @@ void motorPinSetup() {
   conveyor->init();
   rack->init();
   buttonServo.attach(buttonServo_PWM);
-  // buttonServo.write(PRESS_STORE_ANGLE);
   discardServo.attach(discardServo_PWM);
   discardServo.write(DISCARD_STORE_ANGLE);
   buttonServo.write(PRESS_STORE_ANGLE);
@@ -87,7 +87,8 @@ void reset() {
   }
   conveyor->setBrake(400);
   rack->setBrake(400);
-  memset(&encoderCounts, 0, sizeof(encoderCounts));
+  resetEncoders();
+  instantiateTargets();
 
   t0 = micros() / 1000000.;
   state = waitingForData;
@@ -102,13 +103,14 @@ void setup() {
   serialSetup();
   pinMode(LED_BUILTIN, OUTPUT);
   reset();
+  instantiateTargets();
 }
 
 float print_time = 0;
 void loop() {
   t_old = t;
   t = micros() / 1000000. - t0;
-  dt = t * 1000. - t_old * 1000.; // dt in millis not micros
+  dt = t - t_old;
 
   //  PRINT STATEMENTS
   //  non-blocking way to delay printing
@@ -116,7 +118,7 @@ void loop() {
       rangeAlpha * analogRead(rangeBackPin) + (1 - rangeAlpha) * rangeBack;
   rangeFront =
       rangeAlpha * analogRead(rangeFrontPin) + (1 - rangeAlpha) * rangeFront;
-  if ((t - print_time) > 0.5) {
+  if ((t - print_time) > 1) {
 
     // This for loop is used to print out variables that are arrays
     // for (uint8_t i = 0; i < LINE_COUNT; i++) {
@@ -266,9 +268,8 @@ void loop() {
       } else if (targetRack == 1) {
         nextState = waitingForData;
         /*
-        // at back of robot for discarding or dispensing, determine next state
-        if (needsDiscard) {
-          discardServo.write(DISCARD_ANGLE);
+        // at back of robot for discarding or dispensing, determine next
+        state if (needsDiscard) { discardServo.write(DISCARD_ANGLE);
           // todo, figure out how long servo takes to swing
           servoTarget = true;
           nextState = discarding;
@@ -330,6 +331,15 @@ void loop() {
       nextState = waitingForData;
     }
     coastMotors();
+    break;
+  case trajectory:
+    if (shouldStop) {
+      stopDriveMotors();
+      nextState = waitingForData;
+      break;
+    }
+    readEncoders();
+    controlMotorsPathed();
     break;
   }
 
