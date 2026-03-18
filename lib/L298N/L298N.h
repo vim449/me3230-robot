@@ -20,7 +20,7 @@ public:
   void flip(boolean flip); // Flip the direction of the speed for M1.
   // void flipM2(boolean flip);  // Flip the direction of the speed for M2.
   void setBrake(int brake); // brake motor 1
-  // void setM2Brake(int brake); // brake motor 2
+                            // void setM2Brake(int brake); // brake motor 2
   // void setBrakes(int m1Brake, int m2Brake); // set brakes on both motors
 
 private:

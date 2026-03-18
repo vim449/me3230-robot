@@ -96,6 +96,7 @@ void reset() {
 
   rangeBack = analogRead(rangeBackPin);
   rangeFront = analogRead(rangeFrontPin);
+  instantiateTargets();
 }
 
 void setup() {
@@ -103,7 +104,6 @@ void setup() {
   serialSetup();
   pinMode(LED_BUILTIN, OUTPUT);
   reset();
-  instantiateTargets();
 }
 
 float print_time = 0;
@@ -140,6 +140,7 @@ void loop() {
   if (state != waitingForData && xbee.available() > 0) {
     if (xbee.read() == SOFTWARE_STOP) {
       shouldStop = true;
+      reset();
     }
   }
   switch (state) {

@@ -1,0 +1,54 @@
+@startuml
+
+hide empty description
+
+state "Trajectory Following" as trajectory
+trajectory --> data : EVENT: wheel error < threshold & segment == max segment \n SERVICE: stop drive motors;
+trajectory --d[hidden]> discarding
+
+state "Open Loop Driving" as drive
+drive --> data : EVENT: software stop received \n SERVICE: stop drive motors;
+drive --> data: EVENT: distance to wall < stop distance \n SERVICE: stop drive motors;
+
+state "Line Following" as followLine
+followLine --> data : EVENT: software stop received \n SERVICE: stop drive motors;
+followLine --> pressButton : EVENT: distance to wall < stop distance \n SERVICE: stop drive motors, read color sensor, set targetPress to mine block;
+
+state "Storing Block" as storing
+storing --> data : EVENT: software stop received \n SERVICE: stop shovel motor;
+
+state "Waiting for Data" as data
+data --> trajectory : EVENT: path data entered by user \n SERVICE: create path variables
+data --> drive : EVENT: drive direction entered by user \n SERVICE: set x_dot, y_dot, theta_dot;
+data -u> pressButton : EVENT number of button presses entered by user \n SERVICE: set numPresses;
+data -u> followLine : EVENT user asked to line follow \n SERVICE: none;
+data -d> dispensing : EVENT user asked to dispense block \n SERVICE: start conveyor motor;
+data --> discarding : EVENT user asked to discard block \n SERVICE: write out to discard servo;
+data --> movingRack : EVENT user wrote target position for rack \n SERVICE start rack motor and set target limit switch;
+
+state "Dispensing Block" as dispensing
+dispensing --> data : EVENT: software stop received \n SERVICE: stop conveyor motor and write closed to gate servo;
+dispensing --> dispensing : EVENT: reflectance sensor triggered & blocks remain \n SERVICE: none;
+dispensing --> data: EVENT: reflectance sensor triggered & no blocks remain \n SERVICE: stop conveyor motor and write closed to gate servo;
+
+state "Discarding Block" as discarding
+discarding --> data : EVENT: software stop received \n SERVICE: stop rack motor and write store angle to discard servo;
+discarding --> discarding: EVENT: timer elapsed & servo out \n SERVICE: start timer and write servo in;
+discarding --> data: EVENT: timer elapsed & servo in \n SERVICE: none;
+
+state "Pressing Mine Button" as pressButton
+pressButton --> data : EVENT software stop received \n SERVICE: write store angle to button servo;
+pressButton --> pressButton : EVENT timer elapsed & numPressed < targetPress \n SERVICE: if servo out write in and vice versa, increment count, restart timer
+pressButton --> waitingForBlock: EVENT timer elapsed & numPressed > targetPress \n SERVICE: reset press variables and start timer;
+
+state "Waiting for Block" as waitingForBlock
+waitingForBlock --> data: EVENT software stop received \n SERVICE: none;
+waitingForBlock --> pressButton: EVENT timer elapsed & hall effect low \n SERVICE: start timer and set targetPressed to kill silverfish;
+waitingForBlock --> data: EVENT timer elapsed & hall effect high \n SERVICE: none;
+
+state "Moving Rack & Pinion" as movingRack
+movingRack --> data: Event software stop received \n SERVICE: stop rack motor;
+movingRack --> data: target limit switch low \n SERVICE: stop rack motor;
+
+
+@enduml
