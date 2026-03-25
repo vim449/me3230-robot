@@ -48,6 +48,9 @@ void menu(State submenu) {
   case waitingForBlock:
     Serial.println("Sensing block color");
     break;
+  case moveGate:
+    Serial.println("Press anything but 0 to open the gate, 0 to close");
+    break;
   }
 }
 
@@ -288,11 +291,18 @@ void loop() {
             needParam = false;
             readyToSend = true;
             break;
+          case 'g':
+            menu(moveGate);
+            state = moveGate;
+            needParam = true;
+            readyToSend = false;
+            break;
           case 'p':
             pathFunction(); // this function handles all of the
                             // pathing input,
                             // including writing to the mega
             inState = true;
+            break;
           default:
             break;
           }

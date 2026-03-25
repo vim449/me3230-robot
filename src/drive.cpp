@@ -11,6 +11,7 @@ const float gearRatio = 50.0;
 const float countsPerRev = 64.0;
 extern float omega[NUM_MOTORS];
 float theta_des[NUM_MOTORS] = {0};
+float total_theta_err[NUM_MOTORS] = {0};
 float theta_targets[MAX_SEGMENTS][NUM_MOTORS];
 float omega_targets[MAX_SEGMENTS][NUM_MOTORS];
 void (*callback[MAX_SEGMENTS])();
@@ -41,37 +42,45 @@ void resetEncoders() {
     enc->write(0);
   }
   memset(&theta_des, 0, sizeof(theta_des));
+  memset(&total_theta_err, 0, sizeof(total_theta_err));
   t_old = t;
 }
 
+// TODO tune
 float trajectoryKp = 1.50;
+float trajectoryKi = 0.01;
 void controlMotorsPathed() {
   float V[NUM_MOTORS];
   int withinTarget = 0;
   for (int i = 0; i < NUM_MOTORS; i++) {
     // ramp target
-    if (abs(theta_des[i] - theta_targets[segment][i]) > 0.05) {
-      theta_des[i] += omega_targets[segment][i] * dt;
-    }
-    if (abs(theta[i] - theta_targets[segment][i]) < 0.50) {
+    theta_des[i] += omega_targets[segment][i] * dt;
+    // constrain needs arguments in order, so need to use abs
+    theta_des[i] = constrain(theta_des[i], -abs(theta_targets[segment][i]),
+                             abs(theta_targets[segment][i]));
+    if (abs(theta[i] - theta_targets[segment][i]) < 0.30) {
       withinTarget++;
       drive_motors[i]->setSpeed(0);
     } else {
       // control law
-      V[i] = trajectoryKp * (theta_des[i] - theta[i]);
+      total_theta_err[i] += (theta_des[i] - theta[i]) * dt;
+      V[i] = trajectoryKp * (theta_des[i] - theta[i]) +
+             trajectoryKi * total_theta_err[i];
       // drive motor
       V[i] = constrain(V[i], -10, 10);
       drive_motors[i]->setSpeed(400.0 * V[i] / 10.0);
     }
   }
   if (withinTarget >= NUM_MOTORS) {
-    Serial.println("Hit Target");
-    // callback[segment](); // run the callback for finishing segment
     segment++;
     if (segment == totalSegments) {
       stopDriveMotors();
       nextState = waitingForData;
+    } else {
+      stopDriveMotors();
+      delay(500); // testing for multi segment
     }
+    callback[segment](); // run the callback for finishing segment
   }
 }
 
@@ -83,7 +92,6 @@ void addToTargets(BLA::Matrix<NUM_MOTORS, 1, float> w, double time, int idx) {
     theta_targets[idx][i] = w(i) * time;
   }
   callback[idx] = *resetEncoders;
-  Serial.println(idx);
   if ((idx + 1) >= totalSegments) {
     totalSegments = idx + 1;
   }

@@ -43,10 +43,17 @@ void motorPinSetup() {
   }
   conveyor->init();
   rack->init();
+  conveyor->flip(true);
+
   buttonServo.attach(buttonServo_PWM);
   discardServo.attach(discardServo_PWM);
+  gateServo.attach(gateServo_PWM);
   discardServo.write(DISCARD_STORE_ANGLE);
+  delay(20);
   buttonServo.write(PRESS_STORE_ANGLE);
+  delay(20);
+  gateServo.write(0);
+  delay(20);
 }
 
 void sensorPinSetup() {
@@ -77,6 +84,22 @@ void sensorPinSetup() {
   digitalWrite(colorLED, LOW);
 }
 
+void homeRack() {
+  Serial.println("Homing Rack");
+  limitStates[1] = digitalRead(limitPins[1]);
+  rack->setSpeed(20);
+  delay(10);
+  rack->setSpeed(0);
+  while (limitStates[1] == 1) {
+    limitStates[0] = digitalRead(limitPins[0]);
+    limitStates[1] = digitalRead(limitPins[1]);
+    rack->setSpeed(-250);
+  }
+  rack->setSpeed(0);
+  Serial.println("Done Homing Rack");
+  currentRack = 1;
+}
+
 void reset() {
   Serial.println("Reset triggered");
   motorPinSetup();
@@ -104,12 +127,13 @@ void setup() {
   serialSetup();
   pinMode(LED_BUILTIN, OUTPUT);
   reset();
+  homeRack();
 }
 
 float print_time = 0;
 void loop() {
   t_old = t;
-  t = micros() / 1000000. - t0;
+  t = micros() / 1000000.0 - t0;
   dt = t - t_old;
 
   //  PRINT STATEMENTS
@@ -118,7 +142,9 @@ void loop() {
       rangeAlpha * analogRead(rangeBackPin) + (1 - rangeAlpha) * rangeBack;
   rangeFront =
       rangeAlpha * analogRead(rangeFrontPin) + (1 - rangeAlpha) * rangeFront;
-  if ((t - print_time) > 1) {
+  limitStates[0] = digitalRead(limitPins[0]);
+  limitStates[1] = digitalRead(limitPins[1]);
+  if ((t - print_time) > 3) {
 
     // This for loop is used to print out variables that are arrays
     // for (uint8_t i = 0; i < LINE_COUNT; i++) {
@@ -126,11 +152,24 @@ void loop() {
     //   Serial.print('\t');
     // }
 
+    shovelQtr.read(shovelQtrValues);
+    conveyorQtr.read(conveyorQtrValues);
     // Print any non-array variables here
     // Serial.print("Back sensor: ");
     // Serial.print(rangeBack);
     // Serial.print("\t Front sensor: ");
     // Serial.println(rangeFront);
+    // Serial.println("Line Break Sensors");
+    // Serial.print("Shovel: ");
+    // Serial.println(shovelQtrValues[0]);
+    // Serial.print("Conveyor: ");
+    // Serial.println(conveyorQtrValues[0]);
+
+    // Serial.println("Limit Switch Values");
+    // Serial.print("Front");
+    // Serial.println(limitStates[0]);
+    // Serial.print("Back");
+    // Serial.println(limitStates[1]);
     print_time = t;
   }
 
@@ -161,30 +200,43 @@ void loop() {
     }
     break;
   case storing:
+    if (t >= timerTarget) {
+      shouldStop = true;
+    }
+    if (shouldStop) {
+      nextState = waitingForData;
+      conveyor->setSpeed(0);
+      stored[2] = stored[1];
+      stored[1] = stored[0];
+      stored[0] = inShovel;
+    }
     break;
   case dispensing:
 #ifdef DEBUG
     if (shouldPrint)
       Serial.println("Entered state dispensing");
 #endif
-    if (xbee.available() > 0) {
-      if (xbee.read() == SOFTWARE_STOP) {
-        conveyor->setBrake(400);
-        stored[0] = stored[1];
-        stored[1] = stored[2];
-        stored[2] = none;
-        // TODO, determine if robot should dispense again
-        if (false) {
-          startConveyorService(true);
-          nextState = dispensing;
-        } else {
-          // TODO, determine needed x_dot, y_dot, theta_dot
-          // nextState = driving;
+    if (conveyorQtrValues[0] <= 0) {
+      shouldStop = true;
+    }
+    if (t >= timerTarget) {
+      shouldStop = true;
+    }
 
-          // For PM6, every actuation should go back to waitingForData
-          nextState = waitingForData;
-        }
-      }
+    if (shouldStop) {
+      conveyor->setBrake(400);
+      stored[0] = stored[1];
+      stored[1] = stored[2];
+      stored[2] = none;
+      // TODO, determine if robot should dispense again
+      // if (stored[0] != none) {
+      //   startConveyorService(true);
+      //   nextState = dispensing;
+      // } else {
+      //   moveRackService(0);
+      // }
+
+      nextState = waitingForData;
     }
     break;
   case pressButton:
@@ -212,9 +264,11 @@ void loop() {
           // button has been pressed enough times
           numPressed = 0;
           targetPress = 0;
-          // nextState = waitingForData;
-          nextState = waitingForBlock;
-          timerTarget = t + 5;
+          nextState = waitingForData;
+
+          // nextState = waitingForBlock;
+          // number of seconds for block detection timeout
+          timerTarget = t + 20;
         } else {
           // button needs to be pressed again
           buttonServo.write(PRESS_ANGLE);
@@ -230,12 +284,12 @@ void loop() {
     if (shouldPrint)
       Serial.println("Entered state waitngForBlock");
 #endif
-    if (shouldStop) {
-      nextState = waitingForData;
+    // TODO, implement break sensor threshold
+    shovelQtr.read(shovelQtrValues);
+    if (t >= timerTarget || shovelQtrValues[0] <= 0) {
+      shouldStop = true;
     }
-
-    if (t >= timerTarget) {
-      // if hall effect high, press again
+    if (shouldStop) {
       if (analogRead(hallEffectPin) < 200) {
         targetPress = getSilverfishHits();
         // press button again
@@ -249,37 +303,41 @@ void loop() {
         // y_dot = 0;
         // theta_dot = 0;
         // nextState = driving;
-        nextState = waitingForData;
+        timerTarget = t + STORE_TIME;
+        startConveyorService(true);
+        nextState = storing;
       }
     }
-    // iff hall effect low, drive back
+
     break;
   case movingRack:
 #ifdef DEBUG
     if (shouldPrint)
       Serial.println("Entered state movingRack");
 #endif
-    if (digitalRead(limitPins[targetRack]) == LOW) {
+    if (limitStates[targetRack] == 0) {
       // rack is at target
-      rack->setBrake(400);
-      if (targetRack == 0) {
-        // at front of robot, determine next state
-        // For PM6, every actuation should go back to waitingForData
-        nextState = waitingForData;
-      } else if (targetRack == 1) {
-        nextState = waitingForData;
-        /*
-        // at back of robot for discarding or dispensing, determine next
-        state if (needsDiscard) { discardServo.write(DISCARD_ANGLE);
-          // todo, figure out how long servo takes to swing
-          servoTarget = true;
-          nextState = discarding;
-        } else {
-          startConveyorService(true);
-          nextState = dispensing;
-        }
-        */
-      }
+      Serial.println("Rack Stopped");
+      rack->setSpeed(0);
+      conveyor->setSpeed(0);
+      currentRack = targetRack;
+      nextState = waitingForData;
+      // if (currentRack == 0) {
+      //   // at front of robot, determine next state
+      //   nextState = waitingForData;
+      // } else if (targetRack == 1) {
+      //   needsDiscard = false;
+      //   if (needsDiscard) {
+      //     discardServo.write(DISCARD_ANGLE);
+      //     servoTarget = true;
+      //     timerTarget = t + DISCARD_TIME;
+      //     nextState = discarding;
+      //   } else {
+      //     // startConveyorService(true);
+      //     // nextState = dispensing;
+      //     nextState = waitingForData;
+      //   }
+      // }
     }
   case waitingForData:
     parseData();
@@ -293,11 +351,12 @@ void loop() {
       if (servoTarget) {
         // servo finished extending, bring it back
         discardServo.write(DISCARD_STORE_ANGLE);
-        timerTarget = t + 1;
+        timerTarget = t + DISCARD_TIME;
         servoTarget = false;
         nextState = discarding;
       } else {
         // servo finished retracting, done discarding
+        // moveRackService(0);
         nextState = waitingForData;
       }
     }
@@ -342,6 +401,10 @@ void loop() {
     readEncoders();
     controlMotorsPathed();
     break;
+  case moveGate:
+    if (timerTarget >= t) {
+      nextState = waitingForData;
+    }
   }
 
 #ifdef DEBUG

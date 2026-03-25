@@ -20,7 +20,7 @@ bool motors_exist = false; // to ensure motor objects are only created once
 L298N *drive_motors[NUM_MOTORS];
 L298N *conveyor;
 L298N *rack;
-PWMServo buttonServo, discardServo;
+PWMServo buttonServo, discardServo, gateServo;
 // maps from x' y' theta' space to motor space, can be found from getJacobian.m
 BLA::Matrix<NUM_MOTORS, NUM_MOTORS> fullJacobian = motorJacobian;
 
@@ -30,6 +30,8 @@ QTRSensors shovelQtr;
 QTRSensors conveyorQtr;
 uint16_t lineValues[LINE_COUNT];
 uint16_t lineValuesFiltered[LINE_COUNT];
+uint16_t shovelQtrValues[1];
+uint16_t conveyorQtrValues[1];
 bool limitStates[2] = {
     true, true}; // switches are high by default and low when triggered
 Encoder *encoders[NUM_MOTORS];
@@ -62,7 +64,8 @@ double distToWall = 0;
 
 // game variables
 BlockType stored[3] = {none};
-BlockType pick = {wood};
-BlockType sword = {wood};
+BlockType inShovel = none;
+BlockType pick = wood;
+BlockType sword = wood;
 bool shield = false;
 bool needsDiscard = false;

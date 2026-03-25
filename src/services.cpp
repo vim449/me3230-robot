@@ -3,24 +3,24 @@
 // this file contains all services small enough to not warrant their own file
 
 void startConveyorService(bool forwards) {
-  conveyor->setSpeed(forwards ? 400 : -400);
+  conveyor->setSpeed(forwards ? 300 : -300);
 }
 
 void moveRackService(uint8_t target) {
   targetRack = target;
   if (targetRack > currentRack) {
-    // rack needs to drive forwards
-    // Serial.println("Rack driving forwards");
-    rack->setSpeed(400); // TODO, determine if this is a reasonable speed
+    Serial.println("Driving Rack Backwards");
+    rack->setSpeed(-200);
   } else if (targetRack < currentRack) {
-    // rack needs to drive backwards
-    // Serial.println("Rack driving backwards");
-    rack->setSpeed(-400);
+    Serial.println("Driving Rack Forwards");
+    rack->setSpeed(200);
   } else {
     // somehow this function was called with the rack in the target pos
     // Serial.println("Something went wrong");
-    rack->setBrake(400);
+    Serial.println("Null state triggered");
+    rack->setSpeed(0);
   }
+  nextState = movingRack;
 }
 
 BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> mapCenterOfRotation(float x,
@@ -222,6 +222,7 @@ void senseColorService() {
     buttonServo.write(PRESS_ANGLE);
     servoTarget = true;
     nextState = pressButton;
+    inShovel = block;
     xbee.write((byte)block);
 #ifdef DEBUG
     switch (block) {

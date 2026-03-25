@@ -18,7 +18,7 @@ extern bool shouldPrint;
 extern L298N *drive_motors[NUM_MOTORS];
 extern L298N *conveyor;
 extern L298N *rack;
-extern PWMServo buttonServo, discardServo;
+extern PWMServo buttonServo, discardServo, gateServo;
 extern BLA::Matrix<NUM_MOTORS, NUM_MOTORS> fullJacobian;
 
 // sensors
@@ -47,6 +47,7 @@ extern double line_err, total_line_err;
 
 // game variables
 extern BlockType stored[3];
+extern BlockType inShovel;
 extern BlockType pick;
 extern BlockType sword;
 extern bool shield;

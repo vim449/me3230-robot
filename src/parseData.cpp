@@ -48,12 +48,21 @@ void parseData(void) {
       } else if (nextState == discarding) {
         discardServo.write(DISCARD_ANGLE);
         // buttonServo.write(buttonServo.read());
-        timerTarget = t + 2;
+        timerTarget = t + DISCARD_TIME;
         servoTarget = true;
       } else if (nextState == movingRack) {
+        Serial.print("Moving rack to: ");
+        Serial.println(param - 48);
         moveRackService(param - 48);
       } else if (nextState == dispensing) {
-        startConveyorService(true);
+        if ((param - 48) % 2 == 0) {
+          startConveyorService(true);
+          timerTarget = t + DISPENSE_TIME;
+        } else {
+          startConveyorService(true);
+          timerTarget = t + STORE_TIME;
+          nextState = storing;
+        }
       } else if (nextState == lineFollowing) {
         startLineFollowing();
       } else if (nextState == coasting) {
@@ -92,6 +101,15 @@ void parseData(void) {
           }
         }
         t_old = t;
+      } else if (nextState == moveGate) {
+        if (param == '0') {
+          servoTarget = CLOSE;
+          gateServo.write(GATE_CLOSE_ANGLE);
+        } else {
+          servoTarget = OPEN;
+          gateServo.write(GATE_OPEN_ANGLE);
+        }
+        timerTarget = t + GATE_TIME;
       }
     }
   }
