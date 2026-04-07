@@ -10,6 +10,9 @@
 
 #include "globals.h"
 #include "sending.h"
+#include "strategy.h"
+
+bool compMode = false;
 
 // TODO move these out of being externs
 double line_err = 0;
@@ -32,14 +35,13 @@ uint16_t lineValues[LINE_COUNT];
 uint16_t lineValuesFiltered[LINE_COUNT];
 uint16_t shovelQtrValues[1];
 uint16_t conveyorQtrValues[1];
-bool limitStates[2] = {
+bool limitStates[3] = {
     true, true}; // switches are high by default and low when triggered
 Encoder *encoders[NUM_MOTORS];
 double hallEffect = 0.0;
 
 // time variables
 double t, t_old, t0, dt;
-bool shouldPrint;
 
 // control variables
 State state, nextState;
@@ -49,6 +51,7 @@ uint8_t currentRack = 0; // index of limit switch the rack is resting at
 double timerTarget = 0;
 
 bool servoTarget = false; // true if the servo should be extended
+bool gatePos = false;
 uint8_t targetPress = 0;
 uint8_t numPressed = 0; // number of times button pressed
 
@@ -67,5 +70,10 @@ BlockType stored[3] = {none};
 BlockType inShovel = none;
 BlockType pick = wood;
 BlockType sword = wood;
+PosType headingLocation = start;
+PosType currentLocation = start;
 bool shield = false;
 bool needsDiscard = false;
+Strategy *strat = new defaultStrategy();
+bool shouldReset = false;
+bool requireAttacking = false;

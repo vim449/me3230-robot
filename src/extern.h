@@ -8,7 +8,9 @@
 #include "QTRSensors.h"
 #include "globals.h"
 #include "sending.h"
+#include "strategy.h"
 
+extern bool compMode;
 // turn off when not connected to pc for performance
 #ifdef DEBUG
 extern bool shouldPrint;
@@ -41,14 +43,21 @@ extern double t, t0, t_old, timerTarget, dt;
 extern State state, nextState;
 extern float x_dot, y_dot, theta_dot;
 extern uint8_t targetRack, currentRack;
-extern uint8_t targetPress;
+extern uint8_t targetPress, numPressed;
 extern bool servoTarget;
 extern double line_err, total_line_err;
+extern bool heading; // which direction the robot is driving towards
+extern bool gatePos;
 
 // game variables
 extern BlockType stored[3];
 extern BlockType inShovel;
 extern BlockType pick;
 extern BlockType sword;
+extern PosType headingLocation;
+extern PosType currentLocation;
 extern bool shield;
 extern bool needsDiscard;
+extern Strategy *strat;
+extern bool shouldReset;
+extern bool requireAttacking;

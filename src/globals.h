@@ -2,25 +2,26 @@
 #include <Arduino.h>
 #include <BasicLinearAlgebra.h>
 
-#define DISCARD_ANGLE 180
-#define DISCARD_STORE_ANGLE 45
-#define DISCARD_TIME 2
+#define DISCARD_ANGLE 100
+#define DISCARD_STORE_ANGLE 0
+#define DISCARD_TIME 1.7
 #define PRESS_ANGLE 60
 #define PRESS_STORE_ANGLE 0
 #define PRESS_TIME 0.20
-#define GATE_CLOSE_ANGLE 0
-#define GATE_OPEN_ANGLE 90
+#define GATE_START_ANGLE 0
+#define GATE_CLOSE_ANGLE 45
+#define GATE_OPEN_ANGLE 135
 #define GATE_TIME 1.1
 #define xbee Serial3
 #define BACK false
 #define FRONT true
-#define STORE_TIME 2.1
+#define STORE_TIME 8.0
 #define DISPENSE_TIME 12
 #define OPEN true
 #define CLOSE false
 
-#define minDist 4.0
-#define stopDist 3.0
+#define minDist 3.0
+#define stopDist 2.0
 
 #define DEBUG
 
@@ -44,7 +45,7 @@ const uint8_t conveyor_PWM = 44, conveyor_C = 47, conveyor_D = 48;
 const uint8_t hallEffectPin = A6;
 const uint8_t rangeBackPin = A0;
 const uint8_t rangeFrontPin = A1;
-const uint8_t limitPins[2] = {51, 52};
+const uint8_t limitPins[3] = {51, 52, 53};
 
 // reflectance sensors
 #define LINE_COUNT 8
@@ -69,10 +70,11 @@ const BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> motorJacobian = {
     -0.1565 / rw};
 
 struct ColorSensing {
-  float Red;
-  float Green;
-  float Blue;
-  float Clear;
+    float Red;
+    float Green;
+    float Blue;
+    float Clear;
 };
 
 enum BlockType { none, wood, stone, iron, diamond };
+enum PosType { start, leftTree, leftMine, rightMine, rightTree, chest, craft };
