@@ -5,9 +5,9 @@
 #define DISCARD_ANGLE 100
 #define DISCARD_STORE_ANGLE 0
 #define DISCARD_TIME 1.7
-#define PRESS_ANGLE 60
+#define PRESS_ANGLE 100
 #define PRESS_STORE_ANGLE 0
-#define PRESS_TIME 0.20
+#define PRESS_TIME 0.40
 #define GATE_START_ANGLE 0
 #define GATE_CLOSE_ANGLE 45
 #define GATE_OPEN_ANGLE 135
@@ -15,12 +15,12 @@
 #define xbee Serial3
 #define BACK false
 #define FRONT true
-#define STORE_TIME 8.0
+#define STORE_TIME 4.2
 #define DISPENSE_TIME 12
 #define OPEN true
 #define CLOSE false
 
-#define minDist 3.0
+#define minDist 6.25
 #define stopDist 2.0
 
 #define DEBUG
@@ -63,7 +63,7 @@ const long USB_BAUD = 57600;
 const double LINE_KP = 0.375;
 const double LINE_FEED = 0.9;
 
-const double rw = 47.4 / 1000.0 / 2.0;
+const double rw = 48.0 / 1000.0 / 2.0;
 const BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> motorJacobian = {
     0,           1 / rw,      0.1417 / rw,        sqrt(3) / (2 * rw),
     -0.5 / rw,   0.1565 / rw, sqrt(3) / (2 * rw), 0.5 / rw,

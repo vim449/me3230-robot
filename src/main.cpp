@@ -98,11 +98,20 @@ void homeRack() {
         limitStates[0] = digitalRead(limitPins[0]);
         limitStates[1] = digitalRead(limitPins[1]);
         limitStates[2] = digitalRead(limitPins[2]);
-        rack->setSpeed(250);
+        rack->setSpeed(350);
     }
     rack->setSpeed(0);
     Serial.println("Done Homing Rack");
     currentRack = 0;
+}
+
+void homeShovel() {
+    limitStates[2] = digitalRead(limitPins[2]);
+    while (limitStates[2] == 1) {
+        limitStates[2] = digitalRead(limitPins[2]);
+        conveyor->setSpeed(350);
+    }
+    conveyor->setSpeed(0);
 }
 
 void reset() {
@@ -128,15 +137,6 @@ void reset() {
     rangeFront = analogRead(rangeFrontPin);
 }
 
-void startGame() {
-    currentLocation = start;
-    compMode = true;
-    driveToLeftMine();
-    state = trajectory;
-    nextState = state;
-    gateServo.write(GATE_CLOSE_ANGLE);
-}
-
 void setup() {
     // put your setup code here, to run once:
     serialSetup();
@@ -144,12 +144,15 @@ void setup() {
     reset();
     // set to false to do matlab connected transfer function derivation
     if (true) {
+        gateServo.write(GATE_START_ANGLE);
         homeRack();
+        homeShovel();
     } else {
         loop_cltf(0, 200, 200);
     }
+    t0 = micros() / 1000000.;
 
-    startGame();
+    // startGame();
 }
 
 float print_time = 0;
@@ -350,8 +353,7 @@ void loop() {
         }
         break;
     case lineFollowing:
-        distToWall = min(getRangeDistance(rangeBack, BACK),
-                         getRangeDistance(rangeFront, FRONT));
+        distToWall = getPrimaryRangeDist();
         if (distToWall <= minDist) {
             shouldStop = true;
         }
@@ -364,9 +366,9 @@ void loop() {
             }
             fullJacobian = motorJacobian; // reset center of rotation
         } else {
-            x_dot = map((float)min(distToWall, minDist + stopDist), minDist,
-                        minDist + stopDist, 0.2, 2.1);
-            followLine(x_dot);
+            // x_dot = map((float)min(distToWall, minDist + stopDist), minDist,
+            // minDist + stopDist, 0.2, 2.1);
+            followLine(2.4);
         }
         break;
     case coasting:

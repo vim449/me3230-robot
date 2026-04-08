@@ -85,7 +85,7 @@ void controlMotorsPathed() {
                                  abs(theta_targets[segment][i]));
         theta_des_filtered[i] =
             theta_des_filtered[i] * 0.95 + theta_des[i] * (1 - 0.95);
-        if (abs(theta[i] - theta_targets[segment][i]) < 0.30) {
+        if (abs(theta[i] - theta_targets[segment][i]) < 0.20) {
             withinTarget++;
             drive_motors[i]->setSpeed(0);
         } else {
@@ -106,12 +106,15 @@ void controlMotorsPathed() {
     }
     if (withinTarget >= NUM_MOTORS) {
         segment++;
-        if (segment == totalSegments) {
-            stopDriveMotors();
-            nextState = waitingForData;
+        if (!compMode) {
+            if (segment == totalSegments) {
+                stopDriveMotors();
+                nextState = waitingForData;
+            } else {
+                stopDriveMotors();
+            }
         } else {
             stopDriveMotors();
-            delay(500); // testing for multi segment
         }
         callback[segment - 1](); // run the callback for finishing segment
     }

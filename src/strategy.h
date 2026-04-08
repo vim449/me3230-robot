@@ -2,6 +2,21 @@
 #include "globals.h"
 
 void driveToLeftMine();
+void driveToRightMine();
+void driveToCraftingTable();
+
+enum CraftType {
+    StonePickaxe,
+    IronPickaxe,
+    DiamondPickaxe,
+    StoneSword,
+    IronSword,
+    DiamondSword,
+    Shield
+};
+
+bool needFullRow(CraftType item);
+BlockType requiredOre(CraftType item);
 
 class Strategy {
   public:
@@ -25,5 +40,11 @@ class defaultStrategy : public Strategy {
     void getCurrentCraftTarget();
 
   private:
+    bool storeShift = false;
+    bool performingCraft = false;
+    bool backRowDone = true;
+    int craftPos = 8; // top to bottom left to right, 1->9
     bool neededMaterials[5] = {false, false, false, false, false};
+    CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
+    int currentCraft = 0;
 };

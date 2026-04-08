@@ -58,7 +58,8 @@ void parseData(void) {
             } else if (nextState == lineFollowing) {
                 startLineFollowing();
             } else if (nextState == coasting) {
-                shouldReset = true;
+                startGame();
+                return;
             } else if (nextState == waitingForBlock) {
                 senseColorService();
             } else if (nextState == trajectory) {

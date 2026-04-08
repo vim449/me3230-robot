@@ -84,7 +84,7 @@ void controlMotorsClamped(float x, float y) {
 }
 
 void controlMotorsClamped() {
-    // Assumes that full rotation jacobian has been pre-cached and just scaless
+    // Assumes that full rotation jacobian has been pre-cached and just scales
     // motor coordinates down by the fastest motor's saturation
     BLA::Matrix<NUM_MOTORS, 1> in = {x_dot, y_dot, theta_dot};
     BLA::Matrix<NUM_MOTORS, 1> motorSpeeds = fullJacobian * in;
@@ -186,15 +186,15 @@ ColorSensing getColorData() {
     return data;
 };
 
-uint8_t getBlockHits(BlockType block) {
+int getBlockHits(BlockType block) {
     if (block == wood) {
         return pick == wood ? 5 : pick == stone ? 4 : pick == iron ? 2 : 1;
     } else if (block == stone) {
         return pick == wood ? 10 : pick == stone ? 5 : pick == iron ? 3 : 2;
     } else if (block == iron) {
-        return pick == wood ? 10 : pick == stone ? 10 : pick == iron ? 5 : 3;
+        return pick == wood ? -10 : pick == stone ? 10 : pick == iron ? 5 : 3;
     } else {
-        return pick == wood ? 10 : pick == stone ? 10 : pick == iron ? 10 : 5;
+        return pick == wood ? -10 : pick == stone ? -10 : pick == iron ? 10 : 5;
     }
 }
 
@@ -205,16 +205,16 @@ uint8_t getSilverfishHits() {
 void printBlock(BlockType block) {
     switch (block) {
     case wood:
-        Serial.println("Wood");
+        Serial.print("Wood");
         break;
     case stone:
-        Serial.println("Stone");
+        Serial.print("Stone");
         break;
     case iron:
-        Serial.println("Iron");
+        Serial.print("Iron");
         break;
     case diamond:
-        Serial.println("Diamond");
+        Serial.print("Diamond");
         break;
     case none:
         break;
@@ -250,16 +250,13 @@ void pressButtonService(int goalPress) {
 void senseColorService() {
     // Color sensor only used on middle mines, which give stone iron diamond
     // only
-
-    bool canMine = false;
-    int hits = 0;
     ColorSensing data = getColorData(); // NOTE, will cause a 30ms delay
     float red = 100 * data.Clear / data.Red;
     float blue = 100 * data.Clear / data.Blue;
     float green = 100 * data.Clear / data.Green;
-    Serial.println(red);
-    Serial.println(green);
-    Serial.println(blue);
+    // Serial.println(red);
+    // Serial.println(green);
+    // Serial.println(blue);
 
     BlockType block = stone;
     if (red >= 45 && blue <= 30 && green <= 30) {
@@ -267,15 +264,16 @@ void senseColorService() {
     } else if (blue >= 30 && red <= 40 && green <= 35) {
         block = diamond;
     }
-    hits = getBlockHits(block);
+    int hits = getBlockHits(block);
+    inShovel = hits > 0 ? block : none;
+    hits = abs(hits);
 
-    // TODO add condition to mine unminable block anyways
-    canMine = (targetPress > 0);
     pressButtonService(hits);
-    inShovel = canMine ? block : none;
     xbee.write((byte)block);
 #ifdef DEBUG
+    Serial.print("Sensed block ");
     printBlock(block);
+    Serial.println();
 #endif
 }
 
@@ -330,7 +328,7 @@ void printState() {
 
 void storeBlockService() {
     timerTarget = t + STORE_TIME;
-    conveyor->setSpeed(300);
+    conveyor->setSpeed(200);
     nextState = storingBlock;
 }
 
@@ -345,4 +343,19 @@ void gateService(bool shouldOpen) {
     gateServo.write(shouldOpen ? GATE_OPEN_ANGLE : GATE_CLOSE_ANGLE);
     timerTarget = t + GATE_TIME;
     nextState = moveGate;
+}
+
+void startGame() {
+    currentLocation = start;
+    compMode = true;
+    stored[0] = none;
+    stored[1] = none;
+    stored[2] = none;
+    state = waitingForData;
+    nextState = waitingForData;
+    strat->nextGoalCallback();
+
+    gateServo.write(GATE_CLOSE_ANGLE);
+    t0 = micros() / 1000000.;
+    t = micros() / 1000000. - t0;
 }
