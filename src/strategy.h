@@ -45,6 +45,7 @@ class defaultStrategy : public Strategy {
     bool backRowDone = true;
     int craftPos = 8; // top to bottom left to right, 1->9
     bool neededMaterials[5] = {false, false, false, false, false};
-    CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
+    // CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
+    CraftType craftList[0] = {};
     int currentCraft = 0;
 };

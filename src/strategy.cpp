@@ -59,12 +59,20 @@ void slowApproach() {
 // generates a trajectory to drive to the left mine from start
 void driveToLeftMine() {
     if (currentLocation == start) {
+        // tested working
         beginPathing();
         // generateStraightPath(0.0, lineDist, 3, 0);
         // generateSwingTurn(0.0, turnRadius, PI / 2.0, 3, 1);
         // generateStraightPath(0.0, lineDist, 3, 2);
-        generateStraightPath(-PI / 2.0, 0.77, 3.0, 0);
+        generateStraightPath(-PI / 2.0, 0.81, 3.0, 0);
         generateStraightPath(0, 0.40, 2.0, 1);
+    } else if (currentLocation == chest) {
+        double x_dist = 0.45;
+        double y_dist = 0.33;
+        double total_dist = sqrt(x_dist * x_dist + y_dist * y_dist);
+        double ang = atan2(-y_dist, x_dist);
+        generateStraightPath(ang, total_dist, 5.0, 0);
+    } else if (currentLocation == craft) {
     }
     // TODO, chest and crafting table to mine
     headingLocation = leftMine;
@@ -114,11 +122,14 @@ void driveToRightTree() {
             generateStraightPath(-PI / 2.0, 1.12, 3.8, 2);
         }
     } else if (currentLocation == craft) {
+        // tested working
         double x_dist = 0.56;
         double y_dist = 0.83;
         double total_dist = sqrt(x_dist * x_dist + y_dist * y_dist);
         double ang = atan2(-y_dist, x_dist);
         generateStraightPath(ang, total_dist, 5.0, 0);
+    } else if (currentLocation == chest) {
+        generateStraightPath(-PI + 0.30, 0.6, 3.0, 0);
     }
     headingLocation = rightMine;
     setCallback(&slowApproach);
@@ -126,14 +137,17 @@ void driveToRightTree() {
 }
 
 void driveToChest() {
+    // TODO
     beginPathing();
-    if (currentLocation == leftMine) {
-    } else if (currentLocation == rightMine) {
-    } else if (currentLocation == leftTree) {
-    } else if (currentLocation == rightTree) {
-    } else if (currentLocation == start) {
-    } else if (currentLocation == craft) {
-    }
+    generateStraightPath(-PI + 0.30, 0.6, 3.0, 0);
+    // if (currentLocation == leftMine) {
+    // } else if (currentLocation == rightMine) {
+    // } else if (currentLocation == leftTree) {
+    // } else if (currentLocation == rightTree) {
+    //     generateStraightPath(-0.46, 0.6, 3.0, 0);
+    // } else if (currentLocation == start) {
+    // } else if (currentLocation == craft) {
+    // }
     headingLocation = chest;
     setCallback(&endOfPathCallback);
     nextState = trajectory;
@@ -145,13 +159,17 @@ void driveToCraftingTable() {
     if (currentLocation == leftMine) {
         y_dist = 0.33;
     } else if (currentLocation == rightMine) {
+        // TODO
         y_dist = -0.33;
     } else if (currentLocation == leftTree) {
+        // TODO
         y_dist = 0.92;
     } else if (currentLocation == rightTree) {
+        // TODO
         y_dist = -0.92;
     } else {
         // must be chest
+        // TODO
         x_dist = 0.1;
         y_dist = -1.10;
     }
@@ -196,24 +214,27 @@ void defaultStrategy::nextGoalCallback() {
     case drivingTimeBased:
         break;
     case storingBlock:
+        conveyor->setSpeed(0);
         if (currentLocation == leftMine || currentLocation == rightMine) {
             fillCount = 3;
         } else {
             // if crafting is needed, only grab two wood, otherwise 3
-            fillCount =
-                currentCraft < sizeof(craftList) / sizeof(craftList[0]) ? 2 : 3;
+            fillCount = 3;
+            // currentCraft < sizeof(craftList) / sizeof(craftList[0]) ? 2 : 3;
         }
 
-        if (stored[fillCount - 1] != none) {
+        if (true) {
             // conveyor full
-            if (currentCraft < sizeof(craftList) / sizeof(craftList[0])) {
-                // crafting needs to be done, discarding guarantees conveyor is
-                // full with blocks useful for crafting
-                driveToCraftingTable();
-            } else {
-                // crafting doesn't need to be done, go deposit
-                driveToChest();
-            }
+            // if (currentCraft < sizeof(craftList) / sizeof(craftList[0])) {
+            //     // crafting needs to be done, discarding guarantees conveyor
+            //     is
+            //     // full with blocks useful for crafting
+            //     driveToCraftingTable();
+            // } else {
+            //     // crafting doesn't need to be done, go deposit
+            //     driveToChest();
+            // }
+            driveToChest();
         } else {
             // conveyor not full, need to approach wall again
             this->storeShift = false;
@@ -271,6 +292,7 @@ void defaultStrategy::nextGoalCallback() {
             case 8:
                 // need to move to 9 to put in next block
                 if (needsFullRow(craftList[currentCraft])) {
+                    // if a full row is needed, need to move to position 9
                     beginPathing();
                     generateStraightPath(-PI / 2.0, 0.085, 0.3, 0);
                     headingLocation = craft;
@@ -278,6 +300,7 @@ void defaultStrategy::nextGoalCallback() {
                     this->craftPos = 9;
                     nextState = trajectory;
                 } else {
+                    // if a full row isn't needed, move to position 5
                     this->backRowDone = true;
                     this->performingCraft = false;
                     gateServo.write(GATE_CLOSE_ANGLE);
@@ -323,7 +346,9 @@ void defaultStrategy::nextGoalCallback() {
             if (currentRack == 1) {
                 // rack finished extending, need to handle dispensing
                 if (currentLocation == chest) {
-                    gateService(true); // open gate
+                    // gateService(true); // open gate
+                    gateServo.write(GATE_OPEN_ANGLE);
+                    startConveyorService(true);
                 } else {
                     this->performingCraft = true;
                     if (!this->backRowDone) {
@@ -333,7 +358,7 @@ void defaultStrategy::nextGoalCallback() {
                             generateStraightPath(PI / 2.0, 0.09, 0.5, 0);
                             headingLocation = craft;
                             setCallback(&endOfPathCallback);
-                            this->craftPos = 7;
+                            this->craftPos = 9;
                             nextState = trajectory;
                         } else {
                             this->craftPos = 8;
@@ -372,15 +397,24 @@ void defaultStrategy::nextGoalCallback() {
                     senseColorService();
                 } else {
                     pressButtonService(getBlockHits(wood));
+                    inShovel = wood;
                 }
             }
         }
         break;
     case lineFollowing:
+        if (currentLocation == leftMine || currentLocation == rightMine) {
+            senseColorService();
+        } else if (currentLocation == leftTree ||
+                   currentLocation == rightTree) {
+            pressButtonService(getBlockHits(wood));
+            inShovel = wood;
+        }
         break;
     case waitingForData:
     case coasting:
-        driveToLeftMine();
+        // driveToLeftMine();
+        driveToRightTree();
         Serial.print("Currently want block ");
         printBlock(requiredOre(craftList[0]));
         Serial.println();
@@ -402,7 +436,8 @@ void defaultStrategy::nextGoalCallback() {
             senseColorService();
         } else if (currentLocation == rightTree ||
                    currentLocation == leftTree) {
-
+            pressButtonService(getBlockHits(wood));
+            inShovel = wood;
         } else if (currentLocation == chest || currentLocation == craft) {
             if (!this->performingCraft) {
                 // extend rack to begin crafting
@@ -418,7 +453,8 @@ void defaultStrategy::nextGoalCallback() {
 
 void storeBlockServiceShifted() {
     beginPathing();
-    generateStraightPath(0, -0.05, 0.25, 0);
+    generateStraightPath(0, -0.05, 0.33, 0);
+    nextState = trajectory;
     setCallback(&storeBlockService);
 }
 
@@ -426,12 +462,17 @@ void defaultStrategy::getCurrentCraftTarget() {}
 void defaultStrategy::handleBlock(BlockType block) {
     // TODO, write logic to determine if block should be stored or discarded
     // currently just discarding if it's an unminable block
-    if (inShovel == requiredOre(craftList[this->currentCraft])) {
-        // cant actually store directly, need to shift backwards and then store
-        // block
-        this->storeShift = true;
-        storeBlockServiceShifted();
+    if (currentLocation == leftMine || currentLocation == rightMine) {
+        if (inShovel == requiredOre(craftList[this->currentCraft])) {
+            // cant actually store directly, need to shift backwards and then
+            // store block
+            this->storeShift = true;
+            storeBlockServiceShifted();
+        } else {
+            moveRackService(1);
+        }
     } else {
-        moveRackService(1);
+        // mined at a tree
+        storeBlockServiceShifted();
     }
 }

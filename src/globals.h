@@ -20,7 +20,7 @@
 #define OPEN true
 #define CLOSE false
 
-#define minDist 6.25
+#define minDist 4.25
 #define stopDist 2.0
 
 #define DEBUG

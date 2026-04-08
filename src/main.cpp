@@ -230,6 +230,7 @@ void loop() {
             shouldStop = true;
         }
         if (shouldStop) {
+            inShovel = wood;
             conveyor->setSpeed(0);
             stored[2] = stored[1];
             stored[1] = stored[0];
@@ -358,18 +359,32 @@ void loop() {
             shouldStop = true;
         }
         if (shouldStop) {
-            stopDriveMotors();
-            if (getRangeDistance(rangeFront, FRONT) <= minDist + stopDist) {
-                senseColorService();
+            if (compMode) {
+                stopDriveMotors();
+                fullJacobian = motorJacobian;
+                strat->nextGoalCallback();
             } else {
+                stopDriveMotors();
+                fullJacobian = motorJacobian;
                 nextState = waitingForData;
             }
-            fullJacobian = motorJacobian; // reset center of rotation
         } else {
-            // x_dot = map((float)min(distToWall, minDist + stopDist), minDist,
-            // minDist + stopDist, 0.2, 2.1);
             followLine(2.4);
         }
+        // if (shouldStop) {
+        //     stopDriveMotors();
+        //     if (getRangeDistance(rangeFront, FRONT) <= minDist + stopDist) {
+        //         senseColorService();
+        //     } else {
+        //         nextState = waitingForData;
+        //     }
+        //     fullJacobian = motorJacobian; // reset center of rotation
+        // } else {
+        //     // x_dot = map((float)min(distToWall, minDist + stopDist),
+        //     minDist,
+        //     // minDist + stopDist, 0.2, 2.1);
+        //     followLine(2.4);
+        // }
         break;
     case coasting:
         if (shouldStop) {
