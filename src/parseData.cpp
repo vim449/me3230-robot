@@ -107,7 +107,7 @@ void parseData(void) {
             } else if (nextState == waitingForData) {
                 // I'm hijacking this for starting the competition
                 compMode = true;
-                gateService(true);
+                gateService(false);
                 currentLocation = start;
                 strat->nextGoalCallback();
             }

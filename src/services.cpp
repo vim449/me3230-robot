@@ -5,6 +5,7 @@
 // this file contains all services small enough to not warrant their own file
 
 void startConveyorService(bool forwards) {
+    timerTarget = t + 1.0;
     conveyor->setSpeed(forwards ? 300 : -300);
     nextState = dispensing;
 }
@@ -330,6 +331,7 @@ void storeBlockService() {
     timerTarget = t + STORE_TIME;
     conveyor->setSpeed(200);
     nextState = storingBlock;
+    numStored = numStored + 1;
 }
 
 void discardBlockService() {

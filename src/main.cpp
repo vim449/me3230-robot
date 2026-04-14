@@ -200,11 +200,12 @@ void loop() {
         // Serial.print('\t');
         // Serial.println(conveyorQtrValues[0]);
 
-        // Serial.print(limitStates[0]);
-        // Serial.print('\t');
-        // Serial.print(limitStates[1]);
-        // Serial.print('\t');
-        // Serial.println(limitStates[2]);
+        Serial.print(limitStates[0]);
+        Serial.print('\t');
+        Serial.print(limitStates[1]);
+        Serial.print('\t');
+        Serial.println(limitStates[2]);
+        // Serial.println(lineLocalize(),2);
 
         print_time = t;
     }
@@ -245,7 +246,7 @@ void loop() {
         break;
     case dispensing:
         conveyorQtr.read(conveyorQtrValues);
-        if (conveyorQtrValues[0] < 2200) {
+        if (t >= timerTarget && conveyorQtrValues[0] < 2400) {
             shouldStop = true;
         }
         if (shouldStop) {
@@ -267,7 +268,7 @@ void loop() {
 #ifdef DEBUG
                 // Serial.println("Extended");
 #endif
-                buttonServo.write(PRESS_STORE_ANGLE);
+                buttonServo.write(PRESS_RETRACT_ANGLE);
                 timerTarget = t + PRESS_TIME;
                 servoTarget = false;
                 numPressed++;
@@ -299,7 +300,7 @@ void loop() {
     case waitingForBlock:
         shovelQtr.read(shovelQtrValues);
         // TODO, implement break sensor threshold
-        if (t >= timerTarget || shovelQtrValues[0] <= 500) {
+        if (t >= timerTarget && shovelQtrValues[0] <= 2200) {
             shouldStop = true;
         }
         if (shouldStop) {
@@ -355,7 +356,7 @@ void loop() {
         break;
     case lineFollowing:
         distToWall = getPrimaryRangeDist();
-        if (distToWall <= minDist) {
+        if (distToWall <= targetDist) {
             shouldStop = true;
         }
         if (shouldStop) {
@@ -369,7 +370,7 @@ void loop() {
                 nextState = waitingForData;
             }
         } else {
-            followLine(2.4);
+            followLine(2.2);
         }
         // if (shouldStop) {
         //     stopDriveMotors();

@@ -52,8 +52,9 @@ void slowApproach() {
     resetEncoders();
     currentLocation = headingLocation;
     stopDriveMotors();
-    delay(100);
+    delay(20); //micro delay to make sure line following has no inertia
     startLineFollowing();
+    targetDist = longDist;
 }
 
 // generates a trajectory to drive to the left mine from start
@@ -129,7 +130,7 @@ void driveToRightTree() {
         double ang = atan2(-y_dist, x_dist);
         generateStraightPath(ang, total_dist, 5.0, 0);
     } else if (currentLocation == chest) {
-        generateStraightPath(-PI + 0.30, 0.6, 3.0, 0);
+        generateStraightPath(-0.30, 0.6, 3.0, 0);
     }
     headingLocation = rightMine;
     setCallback(&slowApproach);
@@ -209,7 +210,7 @@ void setCraftOutput(CraftType item) {
 
 Strategy::Strategy() {}
 void defaultStrategy::nextGoalCallback() {
-    int fillCount = 0;
+    int fillCount = 3;
     switch (state) {
     case drivingTimeBased:
         break;
@@ -223,33 +224,34 @@ void defaultStrategy::nextGoalCallback() {
             // currentCraft < sizeof(craftList) / sizeof(craftList[0]) ? 2 : 3;
         }
 
-        if (true) {
-            // conveyor full
-            // if (currentCraft < sizeof(craftList) / sizeof(craftList[0])) {
-            //     // crafting needs to be done, discarding guarantees conveyor
-            //     is
-            //     // full with blocks useful for crafting
-            //     driveToCraftingTable();
-            // } else {
-            //     // crafting doesn't need to be done, go deposit
-            //     driveToChest();
-            // }
-            driveToChest();
+        if (numStored >= fillCount) {
+            //conveyor full
+            if (currentCraft < sizeof(craftList) / sizeof(craftList[0])) {
+                // crafting needs to be done, discarding guarantees conveyor is
+                // full with blocks useful for crafting
+                driveToCraftingTable();
+            } else {
+                // crafting doesn't need to be done, go deposit
+                driveToChest();
+            }
+            //driveToChest();
         } else {
             // conveyor not full, need to approach wall again
             this->storeShift = false;
             slowApproach();
+            targetDist = shortDist; // robot is driving slow, get closer to the wall
         }
         break;
     case dispensing:
+        numStored--;
         if (currentLocation == chest) {
             // if conveyor isn't empty, dispense again
-            if (stored[0] != none) {
+            if (numStored > 0) {
                 startConveyorService(true);
             } else {
                 // done depositing, move back to wherever
                 // TODO, logic to determine where to drive to
-                driveToLeftMine();
+                moveRackService(0);
             }
         } else {
             // at crafting table, need to move before placing next block
@@ -333,7 +335,7 @@ void defaultStrategy::nextGoalCallback() {
         } else {
             // block will drop, wait for block
             // lockout time
-            timerTarget = t + 20;
+            timerTarget = t + 3;
             nextState = waitingForBlock;
         }
 
@@ -413,8 +415,8 @@ void defaultStrategy::nextGoalCallback() {
         break;
     case waitingForData:
     case coasting:
-        // driveToLeftMine();
-        driveToRightTree();
+        driveToLeftMine();
+        // driveToRightTree();
         Serial.print("Currently want block ");
         printBlock(requiredOre(craftList[0]));
         Serial.println();
@@ -462,6 +464,7 @@ void defaultStrategy::getCurrentCraftTarget() {}
 void defaultStrategy::handleBlock(BlockType block) {
     // TODO, write logic to determine if block should be stored or discarded
     // currently just discarding if it's an unminable block
+    currentLocation = leftMine;
     if (currentLocation == leftMine || currentLocation == rightMine) {
         if (inShovel == requiredOre(craftList[this->currentCraft])) {
             // cant actually store directly, need to shift backwards and then

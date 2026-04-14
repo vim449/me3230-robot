@@ -64,9 +64,11 @@ double rangeBack = 0;
 double rangeFront = 0;
 const double rangeAlpha = 0.025;
 double distToWall = 0;
+double targetDist = 0;
 
 // game variables
 BlockType stored[3] = {none};
+int numStored = 0;
 BlockType inShovel = none;
 BlockType pick = wood;
 BlockType sword = wood;

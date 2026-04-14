@@ -2,14 +2,15 @@
 #include <Arduino.h>
 #include <BasicLinearAlgebra.h>
 
-#define DISCARD_ANGLE 100
+#define DISCARD_ANGLE 130
 #define DISCARD_STORE_ANGLE 0
 #define DISCARD_TIME 1.7
-#define PRESS_ANGLE 100
-#define PRESS_STORE_ANGLE 0
-#define PRESS_TIME 0.40
+#define PRESS_ANGLE 95
+#define PRESS_RETRACT_ANGLE 30
+#define PRESS_STORE_ANGLE 5
+#define PRESS_TIME 0.3
 #define GATE_START_ANGLE 0
-#define GATE_CLOSE_ANGLE 45
+#define GATE_CLOSE_ANGLE 35
 #define GATE_OPEN_ANGLE 135
 #define GATE_TIME 1.1
 #define xbee Serial3
@@ -20,8 +21,10 @@
 #define OPEN true
 #define CLOSE false
 
-#define minDist 4.25
+#define minDist 5.5
 #define stopDist 2.0
+#define longDist 5
+#define shortDist 4
 
 #define DEBUG
 

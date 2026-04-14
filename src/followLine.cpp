@@ -5,8 +5,8 @@
 // distance in milimeters
 const double lineArrayDist[LINE_COUNT] = {0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6};
 const uint16_t LINE_BIAS[LINE_COUNT] = {146, 96, 96, 96, 96, 96, 96, 122};
-// const double TARGET_LINE = 2.25;
-const double TARGET_LINE = 3.05;
+const double TARGET_LINE = 2.7;
+// const double TARGET_LINE = 3.05;
 
 void startLineFollowing() {
     total_line_err = 0; // reset PID integral windup
@@ -40,7 +40,7 @@ double lineLocalize() {
 
 float line_print_time = 0;
 void followLine(double feed_rate) {
-    float Kp = 12.0;
+    float Kp = 14.0;
     float Ki = 0.000;
     float Kd = 0.5;
 

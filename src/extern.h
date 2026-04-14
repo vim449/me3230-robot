@@ -48,10 +48,12 @@ extern bool servoTarget;
 extern double line_err, total_line_err;
 extern bool heading; // which direction the robot is driving towards
 extern bool gatePos;
+extern double targetDist;
 
 // game variables
 extern BlockType stored[3];
 extern BlockType inShovel;
+extern int numStored;
 extern BlockType pick;
 extern BlockType sword;
 extern PosType headingLocation;
