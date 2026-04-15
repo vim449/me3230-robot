@@ -53,6 +53,9 @@ void menu(State submenu) {
     case moveGate:
         Serial.println("Press anything but 0 to open the gate, 0 to close");
         break;
+    case waitingForData:
+        Serial.println("'w' for wood, 's' for stone', 'i' for iron, 'd' for diamond");
+        break;
     }
 }
 
@@ -308,10 +311,10 @@ void loop() {
                         inState = true;
                         break;
                     case 'S':
-                        inState = true;
+                        menu(waitingForData);
                         state = waitingForData;
-                        needParam = false;
-                        readyToSend = true;
+                        needParam = true;
+                        readyToSend = false;
                     default:
                         break;
                     }

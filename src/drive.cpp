@@ -136,8 +136,8 @@ void addToTargets(BLA::Matrix<NUM_MOTORS, 1, float> w, double time, int idx) {
 void generateStraightPath(double angle, double distance, double time, int idx) {
     // angle is CCW from forwards
     float x_speed = cos(angle) * distance / time;
-    Serial.print("X speed: ");
-    Serial.println(x_speed);
+    //Serial.print("X speed: ");
+    //Serial.println(x_speed);
     float y_speed = -sin(angle) * distance / time;
     BLA::Matrix<NUM_MOTORS, 1, float> globalVel = {x_speed, y_speed, 0};
     auto w = motorJacobian * globalVel;
@@ -168,12 +168,12 @@ void startStraightService(double angle, double dist, double time) {
     t_old = t;
     memset(&theta_des, 0, sizeof(theta_des));
     nextState = trajectory;
-    Serial.print("Target 1: ");
-    Serial.print(theta_targets[0][0]);
-    Serial.print("\tTarget 2: ");
-    Serial.print(theta_targets[0][1]);
-    Serial.print("\tTarget 3: ");
-    Serial.println(theta_targets[0][2]);
+    //Serial.print("Target 1: ");
+    //Serial.print(theta_targets[0][0]);
+    //Serial.print("\tTarget 2: ");
+    //Serial.print(theta_targets[0][1]);
+    //Serial.print("\tTarget 3: ");
+    //Serial.println(theta_targets[0][2]);
 }
 
 void startTurnService(double angle, double time) {
@@ -184,12 +184,12 @@ void startTurnService(double angle, double time) {
     t_old = t;
     memset(&theta_des, 0, sizeof(theta_des));
     nextState = trajectory;
-    Serial.print("Target 1: ");
-    Serial.print(theta_targets[0][0]);
-    Serial.print("\tTarget 2: ");
-    Serial.print(theta_targets[0][1]);
-    Serial.print("\tTarget 3: ");
-    Serial.println(theta_targets[0][2]);
+    // Serial.print("Target 1: ");
+    // Serial.print(theta_targets[0][0]);
+    // Serial.print("\tTarget 2: ");
+    // Serial.print(theta_targets[0][1]);
+    // Serial.print("\tTarget 3: ");
+    // Serial.println(theta_targets[0][2]);
 }
 
 void startHookService(double angle, double time, double radius) {

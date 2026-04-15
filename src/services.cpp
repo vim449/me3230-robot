@@ -6,7 +6,7 @@
 
 void startConveyorService(bool forwards) {
     timerTarget = t + 1.0;
-    conveyor->setSpeed(forwards ? 300 : -300);
+    conveyor->setSpeed(forwards ? 380 : -380);
     nextState = dispensing;
 }
 
@@ -14,10 +14,10 @@ void moveRackService(uint8_t target) {
     targetRack = target;
     if (targetRack > currentRack) {
         Serial.println("Driving Rack Backwards");
-        rack->setSpeed(-200);
+        rack->setSpeed(-350);
     } else if (targetRack < currentRack) {
         Serial.println("Driving Rack Forwards");
-        rack->setSpeed(200);
+        rack->setSpeed(350);
     } else {
         // somehow this function was called with the rack in the target pos
         // Serial.println("Something went wrong");
@@ -35,7 +35,7 @@ BLA::Matrix<NUM_MOTORS, NUM_MOTORS, float> mapCenterOfRotation(float x,
     J(0, 2) = -y;
     J(1, 0) = 0;
     J(1, 1) = 1;
-    J(1, 2) = -x;
+    J(1, 2) = x;
     J(2, 0) = 0;
     J(2, 1) = 0;
     J(2, 2) = 1;
@@ -52,7 +52,8 @@ void controlMotors() {
     // note, this does not use the mapped center of rotation, maybe i should,
     // idk
     BLA::Matrix<NUM_MOTORS, 1, float> in = {x_dot, y_dot, theta_dot};
-    BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds = motorJacobian * in;
+    //BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds = motorJacobian * in;
+    BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds = fullJacobian * in;
 
     for (int i = 0; i < NUM_MOTORS; i++) {
         drive_motors[i]->setSpeed(motorSpeeds(i));
@@ -74,7 +75,7 @@ void controlMotorsClamped(float x, float y) {
     // coordinates down by the amount that the fastest motor is saturated
     BLA::Matrix<NUM_MOTORS, 1, float> in = {x_dot, y_dot, theta_dot};
     BLA::Matrix<NUM_MOTORS, 1, float> motorSpeeds =
-        motorJacobian * mapCenterOfRotation(x, y) * in;
+       fullJacobian  * mapCenterOfRotation(x, y) * in;
     double max = 400.0;
     for (int i = 0; i < NUM_MOTORS; i++) {
         max = abs(motorSpeeds(i)) > max ? motorSpeeds(i) : max;
@@ -200,6 +201,7 @@ int getBlockHits(BlockType block) {
 }
 
 uint8_t getSilverfishHits() {
+  delay(1000); // TODO, need to calibrate
     return sword == wood ? 10 : sword == stone ? 7 : sword == iron ? 4 : 1;
 }
 
@@ -222,6 +224,31 @@ void printBlock(BlockType block) {
     }
 }
 
+void printLocation() {
+  switch (currentLocation) {
+    case start:
+      Serial.print("starting box");
+      break;
+    case leftTree:
+      Serial.print("left tree");
+      break;
+    case leftMine:
+      Serial.print("left mine");
+      break;
+    case rightMine:
+      Serial.print("right mine");
+      break;
+    case rightTree:
+      Serial.print("right tree");
+      break;
+    case chest:
+      Serial.print("chest");
+      break;
+    case craft:
+      Serial.print("crafting table");
+  }
+}
+
 double getPrimaryRangeDist() {
     switch (headingLocation) {
     case start:
@@ -230,6 +257,7 @@ double getPrimaryRangeDist() {
     case rightMine:
     case rightTree:
         return getRangeDistance(rangeFront, FRONT);
+        break;
     case chest:
     case craft:
         return getRangeDistance(rangeBack, BACK);
@@ -255,14 +283,14 @@ void senseColorService() {
     float red = 100 * data.Clear / data.Red;
     float blue = 100 * data.Clear / data.Blue;
     float green = 100 * data.Clear / data.Green;
-    // Serial.println(red);
-    // Serial.println(green);
-    // Serial.println(blue);
+    Serial.println(red);
+    Serial.println(green);
+    Serial.println(blue);
 
     BlockType block = stone;
-    if (red >= 45 && blue <= 30 && green <= 30) {
+    if (red >= 40 && blue <= 40 && green <= 40) {
         block = iron;
-    } else if (blue >= 30 && red <= 40 && green <= 35) {
+    } else if (blue >= 35 && red <= 40 && green <= 35) {
         block = diamond;
     }
     int hits = getBlockHits(block);
@@ -329,7 +357,7 @@ void printState() {
 
 void storeBlockService() {
     timerTarget = t + STORE_TIME;
-    conveyor->setSpeed(200);
+    conveyor->setSpeed(350);
     nextState = storingBlock;
     numStored = numStored + 1;
 }
@@ -347,7 +375,7 @@ void gateService(bool shouldOpen) {
     nextState = moveGate;
 }
 
-void startGame() {
+void startGame(char param) {
     currentLocation = start;
     compMode = true;
     stored[0] = none;
@@ -358,6 +386,41 @@ void startGame() {
     strat->nextGoalCallback();
 
     gateServo.write(GATE_CLOSE_ANGLE);
+    switch(param) {
+      case 'w':
+        pick = wood;
+        break;
+      case 's':
+        pick = stone;
+        break;
+      case 'i':
+        pick = iron;
+        break;
+      case 'd':
+        pick = diamond;
+        break;
+      default:
+        pick = wood;
+        break;
+    }
     t0 = micros() / 1000000.;
     t = micros() / 1000000. - t0;
+
 }
+
+// void startGame() {
+//     currentLocation = leftMine;
+//     compMode = true;
+//     stored[0] = stone;
+//     stored[1] = stone;
+//     stored[2] = stone;
+//     numStored = 3;
+//     state = storingBlock;
+//     nextState = storingBlock;
+//     strat->nextGoalCallback();
+//
+//     gateServo.write(GATE_CLOSE_ANGLE);
+//     buttonServo.write(PRESS_RETRACT_ANGLE);
+//     t0 = micros() / 1000000.;
+//     t = micros() / 1000000. - t0;
+// }

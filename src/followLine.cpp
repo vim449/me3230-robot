@@ -5,8 +5,9 @@
 // distance in milimeters
 const double lineArrayDist[LINE_COUNT] = {0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6};
 const uint16_t LINE_BIAS[LINE_COUNT] = {146, 96, 96, 96, 96, 96, 96, 122};
-const double TARGET_LINE = 2.7;
-// const double TARGET_LINE = 3.05;
+// const double TARGET_LINE = 2.7;
+bool followForwards = true;
+const double TARGET_LINE = 2.8;
 
 void startLineFollowing() {
     total_line_err = 0; // reset PID integral windup
@@ -17,9 +18,23 @@ void startLineFollowing() {
     // pre-cache line following rotation jacobian
     // TODO, find jacobian for turning in front of sensor and add a check here
     mapCenterOfRotation(-0.01586, 0, true);
-    x_dot = 0;
+    x_dot = 2.6;
     delay(10);
     nextState = lineFollowing;
+    followForwards = true;
+}
+
+void startLineFollowingBack() {
+    total_line_err = 0; // reset PID integral windup
+    // reset line filtering
+    for (int i = 0; i < LINE_COUNT; i++) {
+        lineValuesFiltered[i] = lineValues[i] - LINE_BIAS[i];
+    }
+    x_dot = 0.0;
+    mapCenterOfRotation(0.08, 0, true);
+    delay(10);
+    nextState = lineFollowing;
+    followForwards = false;
 }
 
 double lineLocalize() {
@@ -40,9 +55,16 @@ double lineLocalize() {
 
 float line_print_time = 0;
 void followLine(double feed_rate) {
-    float Kp = 14.0;
-    float Ki = 0.000;
-    float Kd = 0.5;
+  float Kp, Ki, Kd;
+    if (followForwards) {
+      Kp = 16.0;
+      Ki = 0.02;
+      Kd = 0.5;
+    } else {
+      Kp = 16.0;
+      Ki = 0.02;
+      Kd = 0.5;
+    }
 
     float linePos = lineLocalize();
     // lineD = lineD / totalVal;
@@ -51,16 +73,17 @@ void followLine(double feed_rate) {
     // want to sample total err and derivative error in millis, not seconds
     float d_err = (line_err - last_err) / dt;
     total_line_err += line_err * dt;
-    total_line_err = constrain(total_line_err, -0.5 / Ki, 0.5 / Ki);
+    total_line_err = constrain(total_line_err, -1.0 / abs(Ki), 1.0 / abs(Ki));
 
-    y_dot = 0;
+    y_dot = 0.0;
     // x_dot = constrain(feed_rate - 0.015 * pow(abs(line_err), 1.2),
     // feed_rate / 1.25, feed_rate);
     x_dot = feed_rate;
-    theta_dot = -(line_err * Kp + d_err * Kd);
-    if (t - line_print_time > 0.5) {
+    theta_dot = -(line_err * Kp + d_err * Kd + total_line_err * Ki);
 
-        Serial.println(line_err, 3);
+    if (t - line_print_time > 0.5) {
+        // Serial.print("theta dot: ");
+        // Serial.println(theta_dot, 3);
         line_print_time = t;
     }
     controlMotorsClamped();

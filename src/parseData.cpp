@@ -16,12 +16,16 @@ void parseData(void) {
             if (nextState == drivingTimeBased) {
                 switch (param) {
                 case 'f':
-                    startStraightService(0, 0.5, 2.5);
+                    //startStraightService(0, 0.5, 2.5);
                     break;
                 case 'b':
-                    x_dot = -1;
+                    mapCenterOfRotation(0.08, 0, true);
+                    headingLocation = craft;
+                    currentLocation = craft;
+                    x_dot = 0;
                     y_dot = 0;
-                    theta_dot = 0;
+                    theta_dot = 16;
+                    timerTarget = t + 4.0;
                     break;
                 case 'l':
                     startHookService(2 * PI, 5, -0.10);
@@ -56,9 +60,11 @@ void parseData(void) {
                     storeBlockService();
                 }
             } else if (nextState == lineFollowing) {
-                startLineFollowing();
+                mapCenterOfRotation(0, 0, true);
+                targetDist = 4.0;
+                startLineFollowingBack();
             } else if (nextState == coasting) {
-                startGame();
+                startGame('w');
                 return;
             } else if (nextState == waitingForBlock) {
                 senseColorService();
@@ -105,11 +111,7 @@ void parseData(void) {
                 }
                 timerTarget = t + GATE_TIME;
             } else if (nextState == waitingForData) {
-                // I'm hijacking this for starting the competition
-                compMode = true;
-                gateService(false);
-                currentLocation = start;
-                strat->nextGoalCallback();
+              startGame(param);
             }
         }
     }

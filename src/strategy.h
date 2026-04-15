@@ -12,7 +12,8 @@ enum CraftType {
     StoneSword,
     IronSword,
     DiamondSword,
-    Shield
+    Shield,
+    NONE
 };
 
 bool needFullRow(CraftType item);
@@ -24,13 +25,11 @@ class Strategy {
     virtual void nextGoalCallback() = 0;
     virtual void handleBlock(BlockType) = 0;
     virtual void getCurrentCraftTarget() = 0;
+    CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
+    CraftType currentItem = craftList[0]; // just a helper variable to shorten other code
+    bool backRowDone = false;
 
   private:
-    // TODO, determine needed member variables
-
-    // boolean for each blocktype if it's needed
-    // none, wood, stone, iron, diamond
-    bool neededMaterials[5] = {false, false, false, false, false};
 };
 
 class defaultStrategy : public Strategy {
@@ -38,14 +37,17 @@ class defaultStrategy : public Strategy {
     void nextGoalCallback();
     void handleBlock(BlockType);
     void getCurrentCraftTarget();
+    //CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
+    CraftType craftList[2] = {StonePickaxe, IronPickaxe};
+    CraftType currentItem = craftList[0]; // just a helper variable to shorten other code
 
   private:
+    void finishCraft();
+    void storeBlockServiceShifted();
+
     bool storeShift = false;
     bool performingCraft = false;
-    bool backRowDone = true;
     int craftPos = 8; // top to bottom left to right, 1->9
-    bool neededMaterials[5] = {false, false, false, false, false};
-    CraftType craftList[3] = {StonePickaxe, IronPickaxe, DiamondPickaxe};
-    // CraftType craftList[0] = {};
+
     int currentCraft = 0;
 };

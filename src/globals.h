@@ -4,11 +4,11 @@
 
 #define DISCARD_ANGLE 130
 #define DISCARD_STORE_ANGLE 0
-#define DISCARD_TIME 1.7
-#define PRESS_ANGLE 95
+#define DISCARD_TIME 1.2
+#define PRESS_ANGLE 105
 #define PRESS_RETRACT_ANGLE 30
 #define PRESS_STORE_ANGLE 5
-#define PRESS_TIME 0.3
+#define PRESS_TIME 0.2
 #define GATE_START_ANGLE 0
 #define GATE_CLOSE_ANGLE 35
 #define GATE_OPEN_ANGLE 135
@@ -16,15 +16,15 @@
 #define xbee Serial3
 #define BACK false
 #define FRONT true
-#define STORE_TIME 4.2
+#define STORE_TIME 2.9
 #define DISPENSE_TIME 12
 #define OPEN true
 #define CLOSE false
 
 #define minDist 5.5
 #define stopDist 2.0
-#define longDist 5
-#define shortDist 4
+#define longDist 5.5
+#define shortDist 4.85
 
 #define DEBUG
 

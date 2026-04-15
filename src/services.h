@@ -29,5 +29,6 @@ void storeBlockService();
 void discardBlockService();
 void printState();
 void printBlock(BlockType block);
+void printLocation();
 void gateService(bool shouldOpen);
-void startGame();
+void startGame(char param);

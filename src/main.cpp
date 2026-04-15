@@ -183,29 +183,34 @@ void loop() {
         xbee.read(); // need to control char from buffer
     }
 
+    // used for triggering resets in external files
     if (shouldReset) {
         reset();
     }
 
 #ifdef DEBUG
-    if ((t - print_time) > 0.5) {
+    if ((t - print_time) > 0.75) {
         // This for loop is used to print out variables that are arrays
         // for (uint8_t i = 0; i < LINE_COUNT; i++) {
         //   Serial.print(lineValues[i]);
         //   Serial.print('\t');
         // }
-        // shovelQtr.read(shovelQtrValues);
         // conveyorQtr.read(conveyorQtrValues);
-        // Serial.print(shovelQtrValues[0]);
+        // shovelQtr.read(shovelQtrValues);
+        // Serial.print("Shovel: ");
+        // Serial.println(shovelQtrValues[0]);
         // Serial.print('\t');
         // Serial.println(conveyorQtrValues[0]);
 
-        Serial.print(limitStates[0]);
-        Serial.print('\t');
-        Serial.print(limitStates[1]);
-        Serial.print('\t');
-        Serial.println(limitStates[2]);
+        // Serial.print(limitStates[0]);
+        // Serial.print('\t');
+        // Serial.print(limitStates[1]);
+        // Serial.print('\t');
+        // Serial.println(limitStates[2]);
         // Serial.println(lineLocalize(),2);
+       // Serial.println(getRangeDistance(rangeBack, BACK));
+        // Serial.print("Hall Effect: ");
+        // Serial.println(analogRead(hallEffectPin));
 
         print_time = t;
     }
@@ -213,8 +218,11 @@ void loop() {
 
     switch (state) {
     case drivingTimeBased:
-        if (getRangeDistance(rangeBack, BACK) < 15) {
-            shouldStop = true;
+        // if (getRangeDistance(rangeBack, BACK) < 15) {
+        //     shouldStop = true;
+        // }
+        if (t >= timerTarget) {
+          shouldStop = true;
         }
         if (shouldStop) {
             // finished driving, for now go back to waiting for instructions
@@ -300,15 +308,21 @@ void loop() {
     case waitingForBlock:
         shovelQtr.read(shovelQtrValues);
         // TODO, implement break sensor threshold
-        if (t >= timerTarget && shovelQtrValues[0] <= 2200) {
+        if (t >= timerTarget && shovelQtrValues[0] <= 2000) {
             shouldStop = true;
         }
+        if (t >= timerTarget + 3.0) {
+          pressButtonService(2);
+        }
         if (shouldStop) {
-            if (analogRead(hallEffectPin) < 200) {
+            if (analogRead(hallEffectPin) < 400) {
                 // block is a silverfish
                 requireAttacking = true;
                 // short circuiting strategy because this is always required
                 pressButtonService(getSilverfishHits());
+#ifdef DEBUG
+                Serial.println("Silverfish detected");
+#endif
             } else {
                 // block is not a silverfish
                 requireAttacking = false;
@@ -370,22 +384,8 @@ void loop() {
                 nextState = waitingForData;
             }
         } else {
-            followLine(2.2);
+            followLine(x_dot);
         }
-        // if (shouldStop) {
-        //     stopDriveMotors();
-        //     if (getRangeDistance(rangeFront, FRONT) <= minDist + stopDist) {
-        //         senseColorService();
-        //     } else {
-        //         nextState = waitingForData;
-        //     }
-        //     fullJacobian = motorJacobian; // reset center of rotation
-        // } else {
-        //     // x_dot = map((float)min(distToWall, minDist + stopDist),
-        //     minDist,
-        //     // minDist + stopDist, 0.2, 2.1);
-        //     followLine(2.4);
-        // }
         break;
     case coasting:
         if (shouldStop) {

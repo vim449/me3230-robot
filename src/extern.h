@@ -35,6 +35,7 @@ extern Encoder *encoders[NUM_MOTORS];
 extern int32_t encoderCounts[NUM_MOTORS];
 extern float theta[NUM_MOTORS];
 extern float thetaOld[NUM_MOTORS];
+extern bool limitStates[3];
 
 extern double rangeFront, rangeBack;
 
